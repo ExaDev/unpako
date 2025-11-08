@@ -6,9 +6,9 @@ interface AppProvidersProps {
 }
 
 export function AppProviders({ children }: AppProvidersProps) {
-  return (
-    <ThemeProvider>
-      {children}
-    </ThemeProvider>
-  );
+	return (
+		<ThemeProvider>
+			{children}
+		</ThemeProvider>
+	);
 }

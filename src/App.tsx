@@ -1,12 +1,12 @@
-import { ThemeProvider } from './contexts/ThemeContext';
+import { AppProviders } from './components/AppProviders';
 import AppContent from './components/AppContent';
 
 function App() {
-  return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
-  );
+	return (
+		<AppProviders>
+			<AppContent />
+		</AppProviders>
+	);
 }
 
 export default App;
