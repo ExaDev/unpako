@@ -11,36 +11,13 @@ export default defineConfig({
     include: [
       'src/**/*.unit.test.{ts,tsx}',
       'src/**/*.integration.test.{ts,tsx}',
-      'src/**/*.e2e.test.{ts,tsx}'
+      'src/**/*.component.test.{ts,tsx}'
     ],
     exclude: [
       'node_modules',
-      'dist'
+      'dist',
+      'src/**/*.e2e.test.{ts,tsx}'
     ],
-    browser: {
-      enabled: true,
-      name: 'playwright',
-      provider: 'playwright',
-      instances: [
-        {
-          browser: 'chromium',
-          launch: {},
-          context: {},
-        },
-        {
-          browser: 'firefox',
-          launch: {},
-          context: {},
-        },
-        {
-          browser: 'webkit',
-          launch: {},
-          context: {},
-        },
-      ],
-      headless: true,
-      viewport: { width: 1280, height: 720 },
-    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

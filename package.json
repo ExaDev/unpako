@@ -12,6 +12,7 @@
     "test": "vitest",
     "test:unit": "vitest run --reporter=verbose",
     "test:integration": "vitest run --reporter=verbose",
+    "test:component": "vitest run --reporter=verbose",
     "test:e2e": "playwright test",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
