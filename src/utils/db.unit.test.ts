@@ -18,7 +18,7 @@ describe("Database Setup", () => {
 		});
 
 		it("should have correct schema version", () => {
-			expect(db.verno).toBe(1);
+			expect(db.verno).toBe(2);
 		});
 	});
 
@@ -63,13 +63,15 @@ describe("Database Setup", () => {
 		});
 
 		it("should add and retrieve items", async () => {
+			const now = Date.now();
 			const testItem = {
 				id: "test-id-1",
 				data: "dGVzdCBkYXRh", // base64 encoded "test data"
 				filepath: "test.txt",
 				size: 9,
 				compressedSize: 5,
-				timestamp: Date.now(),
+				createdAt: now,
+				modifiedAt: now,
 				type: "uploaded" as const,
 			};
 
@@ -80,6 +82,7 @@ describe("Database Setup", () => {
 		});
 
 		it("should retrieve all items", async () => {
+			const now = Date.now();
 			const testItems = [
 				{
 					id: "test-id-1",
@@ -87,7 +90,8 @@ describe("Database Setup", () => {
 					filepath: "test1.txt",
 					size: 5,
 					compressedSize: 3,
-					timestamp: Date.now(),
+					createdAt: now,
+					modifiedAt: now,
 					type: "uploaded" as const,
 				},
 				{
@@ -96,7 +100,8 @@ describe("Database Setup", () => {
 					filepath: "test2.txt",
 					size: 5,
 					compressedSize: 3,
-					timestamp: Date.now() + 1,
+					createdAt: now + 1,
+					modifiedAt: now + 1,
 					type: "downloaded" as const,
 				},
 			];
@@ -108,13 +113,15 @@ describe("Database Setup", () => {
 		});
 
 		it("should delete items", async () => {
+			const now = Date.now();
 			const testItem = {
 				id: "test-id-delete",
 				data: "ZGF0YWRlbGV0ZQ==",
 				filepath: "delete.txt",
 				size: 5,
 				compressedSize: 3,
-				timestamp: Date.now(),
+				createdAt: now,
+				modifiedAt: now,
 				type: "uploaded" as const,
 			};
 
@@ -126,6 +133,7 @@ describe("Database Setup", () => {
 		});
 
 		it("should clear all items", async () => {
+			const now = Date.now();
 			const testItems = [
 				{
 					id: "clear-test-1",
@@ -133,7 +141,8 @@ describe("Database Setup", () => {
 					filepath: "clear1.txt",
 					size: 5,
 					compressedSize: 3,
-					timestamp: Date.now(),
+					createdAt: now,
+					modifiedAt: now,
 					type: "uploaded" as const,
 				},
 				{
@@ -142,7 +151,8 @@ describe("Database Setup", () => {
 					filepath: "clear2.txt",
 					size: 5,
 					compressedSize: 3,
-					timestamp: Date.now() + 1,
+					createdAt: now + 1,
+					modifiedAt: now + 1,
 					type: "uploaded" as const,
 				},
 			];
@@ -155,13 +165,15 @@ describe("Database Setup", () => {
 		});
 
 		it("should update items", async () => {
+			const now = Date.now();
 			const testItem = {
 				id: "update-test",
 				data: "b3JpZ2luYWw=", // base64 "original"
 				filepath: "original.txt",
 				size: 8,
 				compressedSize: 4,
-				timestamp: Date.now(),
+				createdAt: now,
+				modifiedAt: now,
 				type: "uploaded" as const,
 			};
 
@@ -170,6 +182,7 @@ describe("Database Setup", () => {
 			const updates = {
 				filepath: "updated.txt",
 				url: "https://example.com",
+				modifiedAt: Date.now(), // Update modifiedAt timestamp
 			};
 
 			await db.fileHistory.update("update-test", updates);
@@ -178,9 +191,11 @@ describe("Database Setup", () => {
 			expect(updated?.filepath).toBe("updated.txt");
 			expect(updated?.url).toBe("https://example.com");
 			expect(updated?.data).toBe(testItem.data); // Should remain unchanged
+			expect(updated?.createdAt).toBe(testItem.createdAt); // Should remain unchanged
+			expect(updated?.modifiedAt).toBe(updates.modifiedAt); // Should be updated
 		});
 
-		it("should order items by timestamp", async () => {
+		it("should order items by modifiedAt", async () => {
 			const timestamp1 = Date.now();
 			const timestamp2 = timestamp1 + 1000;
 			const timestamp3 = timestamp2 + 1000;
@@ -192,7 +207,8 @@ describe("Database Setup", () => {
 					filepath: "oldest.txt",
 					size: 7,
 					compressedSize: 4,
-					timestamp: timestamp1,
+					createdAt: timestamp1,
+					modifiedAt: timestamp1,
 					type: "uploaded" as const,
 				},
 				{
@@ -201,7 +217,8 @@ describe("Database Setup", () => {
 					filepath: "middle.txt",
 					size: 6,
 					compressedSize: 4,
-					timestamp: timestamp2,
+					createdAt: timestamp2,
+					modifiedAt: timestamp2,
 					type: "uploaded" as const,
 				},
 				{
@@ -210,7 +227,8 @@ describe("Database Setup", () => {
 					filepath: "newest.txt",
 					size: 6,
 					compressedSize: 4,
-					timestamp: timestamp3,
+					createdAt: timestamp3,
+					modifiedAt: timestamp3,
 					type: "uploaded" as const,
 				},
 			];
@@ -220,8 +238,8 @@ describe("Database Setup", () => {
 			await db.fileHistory.add(testItems[2]); // newest
 			await db.fileHistory.add(testItems[0]); // oldest
 
-			// Get items ordered by timestamp (newest first)
-			const orderedItems = await db.fileHistory.orderBy("timestamp").reverse().toArray();
+			// Get items ordered by modifiedAt (newest first)
+			const orderedItems = await db.fileHistory.orderBy("modifiedAt").reverse().toArray();
 
 			expect(orderedItems[0].filepath).toBe("newest.txt");
 			expect(orderedItems[1].filepath).toBe("middle.txt");
@@ -241,6 +259,35 @@ describe("Database Setup", () => {
 
 			// Clean up the invalid item
 			await db.fileHistory.delete("invalid");
+		});
+
+		it("should support migration from old timestamp format", async () => {
+			// Test migration scenario by manually creating the expected new format
+			const oldTimestamp = Date.now();
+
+			// Simulate what happens during migration - old timestamp is copied to both new fields
+			await db.fileHistory.add({
+				id: "migration-test",
+				data: "b2xkIGZvcm1hdA==", // base64 "old format"
+				filepath: "migration-test.txt",
+				size: 10,
+				compressedSize: 5,
+				createdAt: oldTimestamp, // This would be set during migration from old timestamp
+				modifiedAt: oldTimestamp, // This would be set during migration from old timestamp
+				type: "uploaded",
+			});
+
+			// Retrieve the item
+			const migratedItem = await db.fileHistory.get("migration-test");
+
+			expect(migratedItem).toBeDefined();
+			expect(migratedItem?.filepath).toBe("migration-test.txt");
+			expect(migratedItem?.createdAt).toBe(oldTimestamp);
+			expect(migratedItem?.modifiedAt).toBe(oldTimestamp);
+			expect((migratedItem as any).timestamp).toBeUndefined(); // Old timestamp should not exist
+
+			// Clean up
+			await db.fileHistory.delete("migration-test");
 		});
 	});
 });

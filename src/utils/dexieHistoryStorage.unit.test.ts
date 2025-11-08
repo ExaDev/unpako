@@ -14,12 +14,14 @@ describe("DexieHistoryStorage", () => {
 
 	describe("addToHistory", () => {
 		it("should add a new item to history", async () => {
+			const now = Date.now();
 			const testItem = {
 				data: "dGVzdCBkYXRh", // base64 encoded "test data"
 				filepath: "test.txt",
 				size: 9,
 				compressedSize: 5,
-				timestamp: Date.now(),
+				createdAt: now,
+				modifiedAt: now,
 				type: "uploaded" as const,
 			};
 
@@ -32,17 +34,23 @@ describe("DexieHistoryStorage", () => {
 		});
 
 		it("should generate unique IDs for each item", async () => {
+			const now = Date.now();
 			const testItem = {
 				data: "dGVzdCBkYXRh",
 				filepath: "test.txt",
 				size: 9,
 				compressedSize: 5,
-				timestamp: Date.now(),
+				createdAt: now,
+				modifiedAt: now,
 				type: "uploaded" as const,
 			};
 
 			await DexieHistoryStorage.addToHistory(testItem);
-			await DexieHistoryStorage.addToHistory({ ...testItem, filepath: "test2.txt" });
+			await DexieHistoryStorage.addToHistory({
+				...testItem,
+				filepath: "test2.txt",
+				modifiedAt: now + 1, // Update modifiedAt for the second item
+			});
 
 			const history = await DexieHistoryStorage.getHistory();
 			expect(history).toHaveLength(2);
@@ -51,13 +59,15 @@ describe("DexieHistoryStorage", () => {
 
 		it("should limit history to 50 items", async () => {
 			// Add 55 items
+			const now = Date.now();
 			for (let i = 0; i < 55; i++) {
 				await DexieHistoryStorage.addToHistory({
 					data: `dGVzdCBkYXRhIGl0ZW0g${i}`,
 					filepath: `test${i}.txt`,
 					size: 10,
 					compressedSize: 5,
-					timestamp: Date.now() + i,
+					createdAt: now + i,
+					modifiedAt: now + i,
 					type: "uploaded" as const,
 				});
 			}
@@ -73,7 +83,7 @@ describe("DexieHistoryStorage", () => {
 			expect(history).toEqual([]);
 		});
 
-		it("should return items sorted by timestamp (newest first)", async () => {
+		it("should return items sorted by modifiedAt (newest first)", async () => {
 			const timestamp1 = Date.now();
 			const timestamp2 = timestamp1 + 1000;
 			const timestamp3 = timestamp2 + 1000;
@@ -84,7 +94,8 @@ describe("DexieHistoryStorage", () => {
 				filepath: "middle.txt",
 				size: 5,
 				compressedSize: 3,
-				timestamp: timestamp2,
+				createdAt: timestamp2,
+				modifiedAt: timestamp2,
 				type: "uploaded" as const,
 			});
 
@@ -93,7 +104,8 @@ describe("DexieHistoryStorage", () => {
 				filepath: "latest.txt",
 				size: 5,
 				compressedSize: 3,
-				timestamp: timestamp3,
+				createdAt: timestamp3,
+				modifiedAt: timestamp3,
 				type: "uploaded" as const,
 			});
 
@@ -102,7 +114,8 @@ describe("DexieHistoryStorage", () => {
 				filepath: "oldest.txt",
 				size: 5,
 				compressedSize: 3,
-				timestamp: timestamp1,
+				createdAt: timestamp1,
+				modifiedAt: timestamp1,
 				type: "uploaded" as const,
 			});
 
@@ -116,12 +129,14 @@ describe("DexieHistoryStorage", () => {
 
 	describe("removeFromHistory", () => {
 		it("should remove item by ID", async () => {
+			const now = Date.now();
 			const testItem = {
 				data: "dGVzdCBkYXRh",
 				filepath: "test.txt",
 				size: 9,
 				compressedSize: 5,
-				timestamp: Date.now(),
+				createdAt: now,
+				modifiedAt: now,
 				type: "uploaded" as const,
 			};
 
@@ -147,13 +162,15 @@ describe("DexieHistoryStorage", () => {
 	describe("clearHistory", () => {
 		it("should clear all history items", async () => {
 			// Add some items
+			const now = Date.now();
 			for (let i = 0; i < 5; i++) {
 				await DexieHistoryStorage.addToHistory({
 					data: `ZGF0YSAke2l9`,
 					filepath: `test${i}.txt`,
 					size: 5,
 					compressedSize: 3,
-					timestamp: Date.now() + i,
+					createdAt: now + i,
+					modifiedAt: now + i,
 					type: "uploaded" as const,
 				});
 			}
@@ -169,12 +186,14 @@ describe("DexieHistoryStorage", () => {
 
 	describe("getHistoryItem", () => {
 		it("should return item by ID", async () => {
+			const now = Date.now();
 			const testItem = {
 				data: "dGVzdCBkYXRh",
 				filepath: "test.txt",
 				size: 9,
 				compressedSize: 5,
-				timestamp: Date.now(),
+				createdAt: now,
+				modifiedAt: now,
 				type: "uploaded" as const,
 			};
 
@@ -195,12 +214,14 @@ describe("DexieHistoryStorage", () => {
 
 	describe("updateHistoryItem", () => {
 		it("should update item by ID", async () => {
+			const now = Date.now();
 			const testItem = {
 				data: "dGVzdCBkYXRh",
 				filepath: "test.txt",
 				size: 9,
 				compressedSize: 5,
-				timestamp: Date.now(),
+				createdAt: now,
+				modifiedAt: now,
 				type: "uploaded" as const,
 			};
 
@@ -211,6 +232,7 @@ describe("DexieHistoryStorage", () => {
 			const updates = {
 				filepath: "updated.txt",
 				url: "https://example.com",
+				modifiedAt: Date.now(), // Update modifiedAt timestamp
 			};
 
 			await DexieHistoryStorage.updateHistoryItem(id, updates);
@@ -218,9 +240,11 @@ describe("DexieHistoryStorage", () => {
 			const updatedItem = await DexieHistoryStorage.getHistoryItem(id);
 			expect(updatedItem?.filepath).toBe("updated.txt");
 			expect(updatedItem?.url).toBe("https://example.com");
+			expect(updatedItem?.modifiedAt).toBe(updates.modifiedAt); // Should be updated
 			// Other fields should remain unchanged
 			expect(updatedItem?.data).toBe(testItem.data);
 			expect(updatedItem?.size).toBe(testItem.size);
+			expect(updatedItem?.createdAt).toBe(testItem.createdAt); // Should remain unchanged
 		});
 
 		it("should handle updating non-existent ID gracefully", async () => {
@@ -237,12 +261,14 @@ describe("DexieHistoryStorage", () => {
 	describe("getStats", () => {
 		it("should return correct statistics", async () => {
 			// Add some test items
+			const now = Date.now();
 			await DexieHistoryStorage.addToHistory({
 				data: "dGVzdDE=", // base64 "test1"
 				filepath: "uploaded1.txt",
 				size: 5,
 				compressedSize: 3,
-				timestamp: Date.now(),
+				createdAt: now,
+				modifiedAt: now,
 				type: "uploaded" as const,
 			});
 
@@ -251,7 +277,8 @@ describe("DexieHistoryStorage", () => {
 				filepath: "uploaded2.txt",
 				size: 5,
 				compressedSize: 3,
-				timestamp: Date.now(),
+				createdAt: now + 1,
+				modifiedAt: now + 1,
 				type: "uploaded" as const,
 			});
 
@@ -260,7 +287,8 @@ describe("DexieHistoryStorage", () => {
 				filepath: "downloaded1.txt",
 				size: 5,
 				compressedSize: 3,
-				timestamp: Date.now(),
+				createdAt: now + 2,
+				modifiedAt: now + 2,
 				type: "downloaded" as const,
 			});
 
@@ -287,13 +315,15 @@ describe("DexieHistoryStorage", () => {
 	describe("exportHistory and importHistory", () => {
 		it("should export and import history correctly", async () => {
 			// Add some test items
+			const now = Date.now();
 			const testItems = [
 				{
 					data: "dGVzdDE=",
 					filepath: "test1.txt",
 					size: 5,
 					compressedSize: 3,
-					timestamp: Date.now(),
+					createdAt: now,
+					modifiedAt: now,
 					type: "uploaded" as const,
 				},
 				{
@@ -301,7 +331,8 @@ describe("DexieHistoryStorage", () => {
 					filepath: "test2.txt",
 					size: 5,
 					compressedSize: 3,
-					timestamp: Date.now() + 1,
+					createdAt: now + 1,
+					modifiedAt: now + 1,
 					type: "downloaded" as const,
 				},
 			];
@@ -328,7 +359,7 @@ describe("DexieHistoryStorage", () => {
 			// Verify imported data
 			const importedHistory = await DexieHistoryStorage.getHistory();
 			expect(importedHistory).toHaveLength(2);
-			expect(importedHistory[0].filepath).toBe("test2.txt"); // Should be sorted by timestamp
+			expect(importedHistory[0].filepath).toBe("test2.txt"); // Should be sorted by modifiedAt
 			expect(importedHistory[1].filepath).toBe("test1.txt");
 		});
 
@@ -382,6 +413,34 @@ describe("DexieHistoryStorage", () => {
 			const history = await DexieHistoryStorage.getHistory();
 			expect(history[0].filepath).toBe("old-filename.txt");
 			expect((history[0] as any).name).toBeUndefined(); // 'name' should be removed
+			expect(history[0].createdAt).toBeDefined();
+			expect(history[0].modifiedAt).toBeDefined();
+		});
+
+		it("should migrate items with single timestamp to createdAt and modifiedAt", async () => {
+			const oldTimestamp = Date.now() - 10000; // 10 seconds ago to ensure difference
+			const oldFormatData = JSON.stringify([
+				{
+					id: "old-timestamp-item",
+					filepath: "old-timestamp.txt",
+					data: "b2xkIHRpbWVzdGFtcA==", // base64 "old timestamp"
+					type: "uploaded",
+					size: 13,
+					compressedSize: 8,
+					timestamp: oldTimestamp, // Old single timestamp
+				},
+			]);
+
+			const result = await DexieHistoryStorage.importHistory(oldFormatData);
+			expect(result.success).toBe(true);
+			expect(result.imported).toBe(1);
+
+			const history = await DexieHistoryStorage.getHistory();
+			expect(history[0].filepath).toBe("old-timestamp.txt");
+			expect(history[0].createdAt).not.toBe(oldTimestamp); // Should be set to current time
+			expect(history[0].modifiedAt).not.toBe(oldTimestamp); // Should be set to current time
+			expect(history[0].createdAt).toBe(history[0].modifiedAt); // Both should be equal
+			expect((history[0] as any).timestamp).toBeUndefined(); // Old timestamp should be removed
 		});
 	});
 });
