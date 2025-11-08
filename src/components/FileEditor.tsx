@@ -23,7 +23,7 @@ import {
 	IconTrash,
 } from "@tabler/icons-react";
 import { useState, useEffect, useCallback } from "react";
-import type { FileHistoryItem } from "../utils/db";
+import type { FileVersion } from "../utils/db";
 import {
 	decompressData,
 	decodeFromBase64,
@@ -34,7 +34,7 @@ import {
 import { getFilepathInfo } from "../utils/fileCompression";
 
 interface FileEditorProps {
-	file: FileHistoryItem | null;
+	file: FileVersion | null;
 	content: string;
 	filepath: string;
 	isEditMode: boolean;
@@ -45,7 +45,7 @@ interface FileEditorProps {
 	onDownload: () => void;
 	onShare: () => void;
 	onDelete: () => void;
-	onUpdateHistory: (item: FileHistoryItem) => void;
+	onUpdateHistory: (item: FileVersion) => void;
 }
 
 export function FileEditor({
@@ -91,14 +91,15 @@ export function FileEditor({
 			const encoded = encodeToBase64(compressed);
 			const url = generateShareableUrl(content, filepath);
 
-			const historyItem: FileHistoryItem = {
-				id: file?.id || crypto.randomUUID(),
+			const historyItem: FileVersion = {
+				versionId: file?.versionId || crypto.randomUUID(),
 				data: encoded,
 				filepath,
 				size: new Blob([content]).size,
 				compressedSize: compressed.length,
 				createdAt: file?.createdAt || Date.now(),
-				modifiedAt: Date.now(),
+				version: file ? file.version + 1 : 1,
+				isLatest: true,
 				url,
 			};
 

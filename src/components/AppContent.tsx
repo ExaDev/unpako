@@ -4,9 +4,10 @@ import { IconPackage, IconCheck, IconLink } from "@tabler/icons-react";
 import { FileTreeSidebar } from "./FileTreeSidebar";
 import { FileEditor } from "./FileEditor";
 import { ThemeToggle } from "./ThemeToggle";
+import { VersionHistoryModal } from "./VersionHistoryModal";
 import type { FileVersion } from "../utils/db";
 import { FileVersionStorage } from "../utils/fileVersionStorage";
-import { generateShareableUrl } from "../utils/fileCompression";
+import { generateShareableUrl, decompressData, decodeFromBase64 } from "../utils/fileCompression";
 import pako from "pako";
 
 function AppContent() {
@@ -19,6 +20,13 @@ function AppContent() {
 		type: "success" | "error";
 		message: string;
 	} | null>(null);
+	const [versionHistoryModal, setVersionHistoryModal] = useState<{
+		filepath: string;
+		opened: boolean;
+	}>({
+		filepath: "",
+		opened: false,
+	});
 
 	const stats = {
 		totalItems: files.length,
@@ -72,8 +80,29 @@ function AppContent() {
 	};
 
 	const handleShowVersionHistory = (filepath: string) => {
-		// TODO: Show version history modal
-		console.log("Show version history for:", filepath);
+		setVersionHistoryModal({
+			filepath,
+			opened: true,
+		});
+	};
+
+	const handleSelectVersion = async (version: FileVersion) => {
+		try {
+			// Decompress the version data and load it into the editor
+			const compressed = decodeFromBase64(version.data);
+			const content = decompressData(compressed);
+
+			setCodeInput(content);
+			setFilepath(version.filepath);
+			setSelectedFile(version);
+			setIsEditMode(false); // Start in view mode
+		} catch (error) {
+			console.error("Error loading version:", error);
+			setShowNotification({
+				type: "error",
+				message: "Failed to load version content",
+			});
+		}
 	};
 
 	const handleUpdateHistory = async (item: FileVersion) => {
@@ -201,6 +230,19 @@ function AppContent() {
 					/>
 				</Grid.Col>
 			</Grid>
+
+			{/* Version History Modal */}
+			<VersionHistoryModal
+				filepath={versionHistoryModal.filepath}
+				opened={versionHistoryModal.opened}
+				onClose={() =>
+					setVersionHistoryModal({
+						filepath: "",
+						opened: false,
+					})
+				}
+				onSelectVersion={handleSelectVersion}
+			/>
 		</Container>
 	);
 }

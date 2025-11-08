@@ -22,7 +22,7 @@ interface TreeNode {
 	path: string;
 	isFolder: boolean;
 	children: Record<string, TreeNode>;
-	fileItem?: FileHistoryItem;
+	fileItem?: FileVersion;
 	level: number;
 }
 
