@@ -43,7 +43,20 @@ else
   echo "SUCCESS: Integration tests passed"
 fi
 
-echo "5. Running e2e tests..."
+echo "5. Running component tests..."
+# Create simple test if none exist
+if ! find src -name "*.component.test.*" -type f 2>/dev/null | grep -q .; then
+  echo "INFO: No component tests found, skipping..."
+else
+  pnpm run test:component
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Component tests failed"
+    exit 1
+  fi
+  echo "SUCCESS: Component tests passed"
+fi
+
+echo "6. Running e2e tests..."
 # Create simple test if none exist
 if ! find src -name "*.e2e.test.*" -type f 2>/dev/null | grep -q .; then
   echo "INFO: No e2e tests found, skipping..."
