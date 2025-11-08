@@ -1,18 +1,25 @@
-import { ActionIcon, Box, Group, Text, rem } from "@mantine/core";
-import { IconChevronRight, IconFile, IconFolder } from "@tabler/icons-react";
-import type { FileHistoryItem } from "../utils/db";
+import { ActionIcon, Box, Group, Text, rem, Tooltip, Badge } from "@mantine/core";
+import { IconChevronRight, IconFile, IconFolder, IconHistory } from "@tabler/icons-react";
+import type { FileVersion } from "../utils/db";
 import { getFilepathInfo } from "../utils/fileCompression";
 import { detectLanguage, getFileIcon } from "../utils/languageDetection";
 import classes from "./FileTreeNode.module.css";
 
 interface FileTreeNodeProps {
-	item: FileHistoryItem;
+	item: FileVersion;
 	level: number;
 	isSelected: boolean;
-	onSelect: (item: FileHistoryItem) => void;
+	onSelect: (item: FileVersion) => void;
+	onShowVersionHistory?: (filepath: string) => void;
 }
 
-export function FileTreeNode({ item, level, isSelected, onSelect }: FileTreeNodeProps) {
+export function FileTreeNode({
+	item,
+	level,
+	isSelected,
+	onSelect,
+	onShowVersionHistory,
+}: FileTreeNodeProps) {
 	const { filename } = getFilepathInfo(item.filepath);
 	const fileIcon = getFileIcon(detectLanguage(filename));
 
@@ -26,16 +33,41 @@ export function FileTreeNode({ item, level, isSelected, onSelect }: FileTreeNode
 			style={{ paddingLeft: rem(level * 16) }}
 			onClick={handleClick}
 		>
-			<Group gap="xs" align="center">
-				<ActionIcon variant="transparent" size="sm" c="dimmed" style={{ visibility: "hidden" }}>
-					<IconChevronRight size={12} />
-				</ActionIcon>
-				<Text component="span" c={fileIcon} size="sm">
-					<IconFile size={16} />
-				</Text>
-				<Text size="sm" className={classes.filename} fw={isSelected ? 600 : 400}>
-					{filename}
-				</Text>
+			<Group gap="xs" align="center" justify="space-between">
+				<Group gap="xs" align="center">
+					<ActionIcon variant="transparent" size="sm" c="dimmed" style={{ visibility: "hidden" }}>
+						<IconChevronRight size={12} />
+					</ActionIcon>
+					<Text component="span" c={fileIcon} size="sm">
+						<IconFile size={16} />
+					</Text>
+					<Text size="sm" className={classes.filename} fw={isSelected ? 600 : 400}>
+						{filename}
+					</Text>
+				</Group>
+				<Group gap="xs" align="center">
+					{item.version > 1 && (
+						<Tooltip label={`Version ${item.version} of ${item.filepath}`}>
+							<Badge size="xs" variant="light" color="blue">
+								v{item.version}
+							</Badge>
+						</Tooltip>
+					)}
+					{onShowVersionHistory && (
+						<Tooltip label="Show version history">
+							<ActionIcon
+								variant="subtle"
+								size="xs"
+								onClick={e => {
+									e.stopPropagation();
+									onShowVersionHistory(item.filepath);
+								}}
+							>
+								<IconHistory size={12} />
+							</ActionIcon>
+						</Tooltip>
+					)}
+				</Group>
 			</Group>
 		</Box>
 	);

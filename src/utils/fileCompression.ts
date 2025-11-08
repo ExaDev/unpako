@@ -14,6 +14,18 @@ export interface FileHistoryItem extends CompressedFile {
 	url?: string;
 }
 
+// New interfaces for versioned file system
+export interface FileSelection {
+	filepath: string;
+	versionId?: string; // undefined = latest version
+}
+
+export interface FileVersionInfo extends CompressedFile {
+	versionId: string;
+	version: number;
+	isLatest: boolean;
+}
+
 // Compress file data and encode to base64
 export function compressFile(file: File): Promise<CompressedFile> {
 	return new Promise((resolve, reject) => {

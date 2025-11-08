@@ -4,14 +4,14 @@ import { IconPackage, IconCheck, IconLink } from "@tabler/icons-react";
 import { FileTreeSidebar } from "./FileTreeSidebar";
 import { FileEditor } from "./FileEditor";
 import { ThemeToggle } from "./ThemeToggle";
-import type { FileHistoryItem } from "../utils/db";
-import { DexieHistoryStorage } from "../utils/dexieHistoryStorage";
+import type { FileVersion } from "../utils/db";
+import { FileVersionStorage } from "../utils/fileVersionStorage";
 import { generateShareableUrl } from "../utils/fileCompression";
 import pako from "pako";
 
 function AppContent() {
-	const [files, setFiles] = useState<FileHistoryItem[]>([]);
-	const [selectedFile, setSelectedFile] = useState<FileHistoryItem | null>(null);
+	const [files, setFiles] = useState<FileVersion[]>([]);
+	const [selectedFile, setSelectedFile] = useState<FileVersion | null>(null);
 	const [codeInput, setCodeInput] = useState("");
 	const [filepath, setFilepath] = useState("");
 	const [isEditMode, setIsEditMode] = useState(true);
@@ -56,14 +56,14 @@ function AppContent() {
 
 	const loadFiles = async () => {
 		try {
-			const historyFiles = await DexieHistoryStorage.getAllItems();
+			const historyFiles = await FileVersionStorage.getLatestFiles();
 			setFiles(historyFiles);
 		} catch (error) {
 			console.error("Error loading files:", error);
 		}
 	};
 
-	const handleFileSelect = (file: FileHistoryItem) => {
+	const handleFileSelect = (file: FileVersion) => {
 		setSelectedFile(file);
 	};
 
@@ -71,9 +71,14 @@ function AppContent() {
 		// This is handled in FileEditor component
 	};
 
-	const handleUpdateHistory = async (item: FileHistoryItem) => {
+	const handleShowVersionHistory = (filepath: string) => {
+		// TODO: Show version history modal
+		console.log("Show version history for:", filepath);
+	};
+
+	const handleUpdateHistory = async (item: FileVersion) => {
 		try {
-			await DexieHistoryStorage.addItem(item);
+			await FileVersionStorage.addItem(item);
 			await loadFiles(); // Refresh files list
 		} catch (error) {
 			console.error("Error updating history:", error);
@@ -112,7 +117,7 @@ function AppContent() {
 	const handleDelete = async () => {
 		if (selectedFile) {
 			try {
-				await DexieHistoryStorage.deleteItem(selectedFile.id);
+				await FileVersionStorage.deleteItem(selectedFile.versionId);
 				await loadFiles();
 				setSelectedFile(null);
 				setCodeInput("");
@@ -173,6 +178,7 @@ function AppContent() {
 						selectedFile={selectedFile}
 						onFileSelect={handleFileSelect}
 						onUpload={handleFileUpload}
+						onShowVersionHistory={handleShowVersionHistory}
 						stats={stats}
 					/>
 				</Grid.Col>

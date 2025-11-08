@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { IconPlus, IconSearch } from "@tabler/icons-react";
 import { useState, useMemo } from "react";
-import type { FileHistoryItem } from "../utils/db";
+import type { FileVersion } from "../utils/db";
 import { FileTreeNode, FolderNode } from "./FileTreeNode";
 import { getFilepathInfo } from "../utils/fileCompression";
 import classes from "./FileTreeSidebar.module.css";
@@ -27,10 +27,11 @@ interface TreeNode {
 }
 
 interface FileTreeSidebarProps {
-	files: FileHistoryItem[];
-	selectedFile: FileHistoryItem | null;
-	onFileSelect: (file: FileHistoryItem) => void;
+	files: FileVersion[];
+	selectedFile: FileVersion | null;
+	onFileSelect: (file: FileVersion) => void;
 	onUpload: () => void;
+	onShowVersionHistory?: (filepath: string) => void;
 	stats: {
 		totalItems: number;
 		totalSize: number;
@@ -43,6 +44,7 @@ export function FileTreeSidebar({
 	selectedFile,
 	onFileSelect,
 	onUpload,
+	onShowVersionHistory,
 	stats,
 }: FileTreeSidebarProps) {
 	const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
@@ -163,11 +165,12 @@ export function FileTreeSidebar({
 		} else if (node.fileItem) {
 			return (
 				<FileTreeNode
-					key={node.fileItem.id}
+					key={node.fileItem.versionId}
 					item={node.fileItem}
 					level={node.level}
-					isSelected={selectedFile?.id === node.fileItem.id}
+					isSelected={selectedFile?.versionId === node.fileItem.versionId}
 					onSelect={onFileSelect}
+					onShowVersionHistory={onShowVersionHistory}
 				/>
 			);
 		}
