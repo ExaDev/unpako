@@ -75,7 +75,7 @@ export class UnpakoDB extends Dexie {
 				const oldItems = await tx.table("fileHistory").toArray();
 
 				// Group by filepath
-				const fileGroups = oldItems.reduce(
+				const fileGroups = (oldItems as FileHistoryItem[]).reduce(
 					(groups, item) => {
 						const filepath = item.filepath || `unnamed/${item.id}`;
 						if (!groups[filepath]) {

@@ -18,7 +18,7 @@ describe("Database Setup", () => {
 		});
 
 		it("should have correct schema version", () => {
-			expect(db.verno).toBe(3);
+			expect(db.verno).toBe(4);
 		});
 	});
 
