@@ -49,13 +49,6 @@ export function VersionHistoryModal({
 	const [versions, setVersions] = useState<FileVersion[]>([]);
 	const [loading, setLoading] = useState(false);
 
-	// Load versions when modal opens
-	useEffect(() => {
-		if (opened && filepath) {
-			loadVersions();
-		}
-	}, [opened, filepath, loadVersions]);
-
 	const loadVersions = useCallback(async () => {
 		setLoading(true);
 		try {
@@ -67,6 +60,13 @@ export function VersionHistoryModal({
 			setLoading(false);
 		}
 	}, [filepath]);
+
+	// Load versions when modal opens
+	useEffect(() => {
+		if (opened && filepath) {
+			loadVersions();
+		}
+	}, [opened, filepath, loadVersions]);
 
 	const handleSelectVersion = (version: FileVersion) => {
 		onSelectVersion(version);
