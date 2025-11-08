@@ -172,7 +172,10 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 							</Group>
 							<Group gap="sm" c="dimmed" fz="sm">
 								<IconCalendar size={12} />
-								<Text>Created: {new Date(downloadReady.timestamp).toLocaleDateString()}</Text>
+								<Text>Created: {new Date(downloadReady.createdAt).toLocaleDateString()}</Text>
+								{downloadReady.modifiedAt !== downloadReady.createdAt && (
+									<Text>• Modified: {new Date(downloadReady.modifiedAt).toLocaleDateString()}</Text>
+								)}
 							</Group>
 						</Stack>
 					</Card>

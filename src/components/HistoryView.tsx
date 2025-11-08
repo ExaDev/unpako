@@ -52,7 +52,9 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 		uploadedCount: 0,
 		downloadedCount: 0,
 	});
-	const [sortBy, setSortBy] = useState<"timestamp" | "filepath" | "size">("timestamp");
+	const [sortBy, setSortBy] = useState<"createdAt" | "modifiedAt" | "filepath" | "size">(
+		"modifiedAt"
+	);
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 	const [showClearModal, setShowClearModal] = useState(false);
 	const [showImportModal, setShowImportModal] = useState(false);
@@ -86,9 +88,12 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 				case "size":
 					comparison = a.size - b.size;
 					break;
-				case "timestamp":
+				case "createdAt":
+					comparison = a.createdAt - b.createdAt;
+					break;
+				case "modifiedAt":
 				default:
-					comparison = a.timestamp - b.timestamp;
+					comparison = a.modifiedAt - b.modifiedAt;
 					break;
 			}
 
@@ -226,13 +231,14 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 				<Select
 					label="Sort by"
 					data={[
-						{ value: "timestamp", label: "Date" },
+						{ value: "modifiedAt", label: "Modified Date" },
+						{ value: "createdAt", label: "Created Date" },
 						{ value: "filepath", label: "Filepath" },
 						{ value: "size", label: "File Size" },
 					]}
 					value={sortBy}
-					onChange={value => setSortBy(value as "timestamp" | "filepath" | "size")}
-					w={120}
+					onChange={value => setSortBy(value as "createdAt" | "modifiedAt" | "filepath" | "size")}
+					w={140}
 					size="sm"
 				/>
 
@@ -319,8 +325,14 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 											</Text>
 											<Text span>
 												<IconCalendar size={12} />
-												{new Date(item.timestamp).toLocaleDateString()}
+												Created: {new Date(item.createdAt).toLocaleDateString()}
 											</Text>
+											{item.modifiedAt !== item.createdAt && (
+												<Text span>
+													<IconCalendar size={12} />
+													Modified: {new Date(item.modifiedAt).toLocaleDateString()}
+												</Text>
+											)}
 										</Group>
 									</div>
 
