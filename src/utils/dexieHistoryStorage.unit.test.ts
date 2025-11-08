@@ -22,7 +22,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 5,
 				createdAt: now,
 				modifiedAt: now,
-				type: "uploaded" as const,
 			};
 
 			await DexieHistoryStorage.addToHistory(testItem);
@@ -42,7 +41,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 5,
 				createdAt: now,
 				modifiedAt: now,
-				type: "uploaded" as const,
 			};
 
 			await DexieHistoryStorage.addToHistory(testItem);
@@ -68,7 +66,6 @@ describe("DexieHistoryStorage", () => {
 					compressedSize: 5,
 					createdAt: now + i,
 					modifiedAt: now + i,
-					type: "uploaded" as const,
 				});
 			}
 
@@ -96,7 +93,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 3,
 				createdAt: timestamp2,
 				modifiedAt: timestamp2,
-				type: "uploaded" as const,
 			});
 
 			await DexieHistoryStorage.addToHistory({
@@ -106,7 +102,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 3,
 				createdAt: timestamp3,
 				modifiedAt: timestamp3,
-				type: "uploaded" as const,
 			});
 
 			await DexieHistoryStorage.addToHistory({
@@ -116,7 +111,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 3,
 				createdAt: timestamp1,
 				modifiedAt: timestamp1,
-				type: "uploaded" as const,
 			});
 
 			const history = await DexieHistoryStorage.getHistory();
@@ -137,7 +131,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 5,
 				createdAt: now,
 				modifiedAt: now,
-				type: "uploaded" as const,
 			};
 
 			await DexieHistoryStorage.addToHistory(testItem);
@@ -171,7 +164,6 @@ describe("DexieHistoryStorage", () => {
 					compressedSize: 3,
 					createdAt: now + i,
 					modifiedAt: now + i,
-					type: "uploaded" as const,
 				});
 			}
 
@@ -194,7 +186,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 5,
 				createdAt: now,
 				modifiedAt: now,
-				type: "uploaded" as const,
 			};
 
 			await DexieHistoryStorage.addToHistory(testItem);
@@ -222,7 +213,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 5,
 				createdAt: now,
 				modifiedAt: now,
-				type: "uploaded" as const,
 			};
 
 			await DexieHistoryStorage.addToHistory(testItem);
@@ -269,7 +259,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 3,
 				createdAt: now,
 				modifiedAt: now,
-				type: "uploaded" as const,
 			});
 
 			await DexieHistoryStorage.addToHistory({
@@ -279,7 +268,6 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 3,
 				createdAt: now + 1,
 				modifiedAt: now + 1,
-				type: "uploaded" as const,
 			});
 
 			await DexieHistoryStorage.addToHistory({
@@ -289,15 +277,12 @@ describe("DexieHistoryStorage", () => {
 				compressedSize: 3,
 				createdAt: now + 2,
 				modifiedAt: now + 2,
-				type: "downloaded" as const,
 			});
 
 			const stats = await DexieHistoryStorage.getStats();
 			expect(stats.totalItems).toBe(3);
 			expect(stats.totalSize).toBe(15); // 5 + 5 + 5
 			expect(stats.totalCompressedSize).toBe(9); // 3 + 3 + 3
-			expect(stats.uploadedCount).toBe(2);
-			expect(stats.downloadedCount).toBe(1);
 		});
 
 		it("should return zero stats when no items exist", async () => {
@@ -306,8 +291,6 @@ describe("DexieHistoryStorage", () => {
 				totalItems: 0,
 				totalSize: 0,
 				totalCompressedSize: 0,
-				uploadedCount: 0,
-				downloadedCount: 0,
 			});
 		});
 	});
