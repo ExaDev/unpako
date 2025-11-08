@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/ExaDev/unpako/compare/v1.2.1...v1.3.0) (2025-11-08)
+
+
+### Features
+
+* add version number and release link to footer ([204995f](https://github.com/ExaDev/unpako/commit/204995fdae05bac1dfb038456f776dae0f85c178))
+
 ## [1.2.1](https://github.com/ExaDev/unpako/compare/v1.2.0...v1.2.1) (2025-11-08)
 
 
