@@ -10,6 +10,7 @@ export default defineConfig({
 		port: 5174,
 		strictPort: true,
 	},
+	base: process.env.NODE_ENV === "production" ? "/unpako/" : "/",
 	plugins: [
 		react(),
 		vanillaExtractPlugin(),
