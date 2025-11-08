@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Container, Title, Text, Group, Card, Badge, Grid, Box, Notification } from "@mantine/core";
 import { IconPackage, IconCheck, IconLink } from "@tabler/icons-react";
-import { FileDownload } from "./FileDownload";
 import { FileTreeSidebar } from "./FileTreeSidebar";
 import { FileEditor } from "./FileEditor";
 import { ThemeToggle } from "./ThemeToggle";
@@ -196,9 +195,6 @@ function AppContent() {
 					/>
 				</Grid.Col>
 			</Grid>
-
-			{/* FileDownload Modal (hidden by default) */}
-			<FileDownload onFileDownloaded={loadFiles} />
 		</Container>
 	);
 }
