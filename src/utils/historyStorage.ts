@@ -8,7 +8,20 @@ export class HistoryStorage {
 	static getHistory(): FileHistoryItem[] {
 		try {
 			const stored = localStorage.getItem(STORAGE_KEY);
-			return stored ? JSON.parse(stored) : [];
+			const history = stored ? JSON.parse(stored) : [];
+
+			// Migrate old items that use 'name' to 'filepath'
+			return history.map((item: FileHistoryItem | { name?: string; filepath?: string }) => {
+				if (item.name && !item.filepath) {
+					return {
+						...item,
+						filepath: item.name,
+						// Remove the old name property to clean up
+						name: undefined,
+					} as FileHistoryItem;
+				}
+				return item as FileHistoryItem;
+			});
 		} catch (error) {
 			console.error("Failed to load history:", error);
 			return [];
@@ -127,8 +140,8 @@ export class HistoryStorage {
 
 			for (const item of data) {
 				try {
-					// Validate item structure
-					if (!item.id || !item.name || !item.data || !item.type) {
+					// Validate item structure (support both new filepath and old name for compatibility)
+					if (!item.id || (!item.filepath && !item.name) || !item.data || !item.type) {
 						errors.push(`Invalid item: Missing required fields`);
 						continue;
 					}
@@ -141,6 +154,12 @@ export class HistoryStorage {
 					// Skip if already exists
 					if (existingIds.has(item.id)) {
 						continue;
+					}
+
+					// Migrate old items with name to filepath
+					if (item.name && !item.filepath) {
+						item.filepath = item.name;
+						item.name = undefined;
 					}
 
 					existingHistory.unshift(item);
