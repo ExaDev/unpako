@@ -49,6 +49,31 @@ export function compressFile(file: File): Promise<CompressedFile> {
 	});
 }
 
+// Compress text content to base64
+export function compressText(content: string, filename: string): CompressedFile {
+	try {
+		// Convert text to bytes
+		const encoder = new TextEncoder();
+		const uint8Array = encoder.encode(content);
+
+		// Compress the data
+		const compressed = pako.deflate(uint8Array);
+
+		// Convert to base64 for URL encoding
+		const base64 = btoa(String.fromCharCode(...compressed));
+
+		return {
+			data: base64,
+			name: filename || "content.txt",
+			size: uint8Array.length,
+			compressedSize: compressed.length,
+			timestamp: Date.now(),
+		};
+	} catch (error) {
+		throw new Error("Failed to compress text: " + error);
+	}
+}
+
 // Decompress file data from base64
 export function decompressFile(compressedFile: CompressedFile): Blob {
 	try {
@@ -66,27 +91,68 @@ export function decompressFile(compressedFile: CompressedFile): Blob {
 
 // Convert compressed file to URL-safe base64
 export function fileToUrl(compressedFile: CompressedFile): string {
-	const encodedData = encodeURIComponent(JSON.stringify(compressedFile));
-	return `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
+	// Only encode the compressed data, keep essential metadata as separate URL params
+	const encodedData = encodeURIComponent(compressedFile.data);
+	const params = new URLSearchParams({
+		name: compressedFile.name,
+		timestamp: compressedFile.timestamp.toString(),
+		data: encodedData,
+	});
+	return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
 }
 
 // Parse URL to extract compressed file data
 export function urlToFile(url: string): CompressedFile | null {
 	try {
 		const urlObj = new URL(url);
-		const dataParam = urlObj.searchParams.get("data");
+		const params = urlObj.searchParams;
 
-		if (!dataParam) return null;
+		// Try new format first (separate parameters)
+		const name = params.get("name");
+		const timestamp = params.get("timestamp");
+		const data = params.get("data");
 
-		const decoded = decodeURIComponent(dataParam);
-		const fileData = JSON.parse(decoded) as CompressedFile;
+		// If all required parameters are present, use new format
+		if (data && name && timestamp) {
+			const decodedData = decodeURIComponent(data);
 
-		// Validate required fields
-		if (!fileData.data || !fileData.name || !fileData.size) {
-			throw new Error("Invalid file data format");
+			// Calculate sizes from the actual data by decompressing
+			let originalSize = 0;
+			try {
+				const compressed = Uint8Array.from(atob(decodedData), c => c.charCodeAt(0));
+				const decompressed = pako.inflate(compressed);
+				originalSize = decompressed.length;
+			} catch {
+				// Fallback if decompression fails
+				originalSize = 0;
+			}
+
+			const compressedSize = decodedData.length;
+
+			return {
+				data: decodedData,
+				name,
+				size: originalSize,
+				compressedSize,
+				timestamp: parseInt(timestamp, 10),
+			};
 		}
 
-		return fileData;
+		// Fallback to old format (single JSON object)
+		const dataParam = params.get("data");
+		if (dataParam) {
+			const decoded = decodeURIComponent(dataParam);
+			const fileData = JSON.parse(decoded) as CompressedFile;
+
+			// Validate required fields
+			if (!fileData.data || !fileData.name || !fileData.size) {
+				throw new Error("Invalid file data format");
+			}
+
+			return fileData;
+		}
+
+		throw new Error("No valid data found in URL");
 	} catch (error) {
 		console.error("Failed to parse URL:", error);
 		return null;
