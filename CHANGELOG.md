@@ -1,3 +1,17 @@
+# [1.2.0](https://github.com/ExaDev/unpako/compare/v1.1.2...v1.2.0) (2025-11-08)
+
+
+### Bug Fixes
+
+* **db:** resolve type issues in database migration ([0064259](https://github.com/ExaDev/unpako/commit/0064259541c02b01de49f0107736eaa27ea94b78))
+
+
+### Features
+
+* integrate path-based file identification and version history UI ([16e2a2f](https://github.com/ExaDev/unpako/commit/16e2a2f43b2f327f6de005237752c9d792c6a64c))
+* **storage:** implement FileVersionStorage with path-based IDs ([b53d63c](https://github.com/ExaDev/unpako/commit/b53d63c41d3759c672b9e7c851d2ab86d95d5fa4))
+* **ui:** add VersionHistoryModal for file version management ([7b2c2c2](https://github.com/ExaDev/unpako/commit/7b2c2c2771959b89d0d1bf9f455fbbdd8419ae5e))
+
 ## [1.1.2](https://github.com/ExaDev/unpako/compare/v1.1.1...v1.1.2) (2025-11-08)
 
 
