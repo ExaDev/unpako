@@ -136,13 +136,8 @@ export class HistoryStorage {
 			for (const item of data) {
 				try {
 					// Validate item structure (support both new filepath and old name for compatibility)
-					if (!item.id || (!item.filepath && !item.name) || !item.data || !item.type) {
+					if (!item.id || (!item.filepath && !item.name) || !item.data) {
 						errors.push(`Invalid item: Missing required fields`);
-						continue;
-					}
-
-					if (item.type !== "uploaded" && item.type !== "downloaded") {
-						errors.push(`Invalid item: Invalid type "${item.type}"`);
 						continue;
 					}
 
