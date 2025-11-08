@@ -3,12 +3,11 @@ import { test, expect } from "@playwright/test";
 test.describe("Theme Switching Functionality", () => {
 	test.beforeEach(async ({ page }) => {
 		// Navigate to the app with longer timeout
-		await page.goto("http://localhost:5174", { timeout: 10000 });
+		await page.goto("/", { timeout: 10000 });
 
-		// Wait for the app to load with more robust selectors
-		await page.waitForSelector("body", { timeout: 10000 });
-		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 10000 });
+		// Wait for the app to load with simpler approach
 		await page.waitForLoadState("domcontentloaded");
+		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 10000 });
 	});
 
 	test("should display theme toggle button in header", async ({ page }) => {
