@@ -14,7 +14,9 @@ import {
 	TextInput,
 	FileInput,
 	Tooltip,
+	Box,
 } from "@mantine/core";
+import { CodeHighlight } from "@mantine/code-highlight";
 import {
 	IconFileText,
 	IconDownload,
@@ -24,6 +26,8 @@ import {
 	IconUpload,
 	IconCopy,
 	IconCheck,
+	IconCode,
+	IconEdit,
 } from "@tabler/icons-react";
 import { FileDownload } from "./FileDownload";
 import { HistoryView } from "./HistoryView";
@@ -31,6 +35,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import type { CompressedFile, FileHistoryItem } from "../utils/fileCompression";
 import { DexieHistoryStorage } from "../utils/dexieHistoryStorage";
 import { compressText, fileToUrl } from "../utils/fileCompression";
+import { detectLanguage } from "../utils/languageDetection";
 import pako from "pako";
 
 function AppContent() {
@@ -47,6 +52,7 @@ function AppContent() {
 	const [shareableUrl, setShareableUrl] = useState("");
 	const [copied, setCopied] = useState(false);
 	const [isInitialLoad, setIsInitialLoad] = useState(true);
+	const [isEditMode, setIsEditMode] = useState(true);
 
 	const updateStats = async () => {
 		const newStats = await DexieHistoryStorage.getStats();
@@ -255,22 +261,54 @@ function AppContent() {
 								leftSection={<IconFileText size={16} />}
 							/>
 
-							<Textarea
-								placeholder="Paste your text, configuration, or any content here..."
-								label="Text Input"
-								description="Supports any text content with proper formatting preserved"
-								minRows={10}
-								maxRows={25}
-								value={codeInput}
-								onChange={event => setCodeInput(event.currentTarget.value)}
-								styles={{
-									input: {
-										fontFamily: "monospace",
-									},
-								}}
-								resize="vertical"
-								autosize
-							/>
+							<Group justify="space-between" mb="xs">
+								<Text size="sm" fw={500}>
+									{isEditMode ? "Text Input" : "Syntax Highlighted Preview"}
+								</Text>
+								<Tooltip label={isEditMode ? "Preview with syntax highlighting" : "Edit text"}>
+									<Button
+										variant="subtle"
+										size="xs"
+										leftSection={isEditMode ? <IconCode size={14} /> : <IconEdit size={14} />}
+										onClick={() => setIsEditMode(!isEditMode)}
+									>
+										{isEditMode ? "Preview" : "Edit"}
+									</Button>
+								</Tooltip>
+							</Group>
+
+							{isEditMode ? (
+								<Textarea
+									placeholder="Paste your text, configuration, or any content here..."
+									description="Supports any text content with proper formatting preserved"
+									minRows={10}
+									maxRows={25}
+									value={codeInput}
+									onChange={event => setCodeInput(event.currentTarget.value)}
+									styles={{
+										input: {
+											fontFamily: "monospace",
+										},
+									}}
+									resize="vertical"
+									autosize
+								/>
+							) : (
+								<Box
+									style={{
+										maxHeight: "400px",
+										overflow: "auto",
+										border: "1px solid var(--mantine-color-gray-3)",
+										borderRadius: "var(--mantine-radius-default)",
+									}}
+								>
+									<CodeHighlight
+										code={codeInput || "// No content to preview"}
+										language={detectLanguage(filepath, codeInput)}
+										withCopyButton
+									/>
+								</Box>
+							)}
 
 							{codeInput.length > 0 && (
 								<Alert icon={<IconAlertCircle size={16} />} title="Text Ready" color="blue" variant="light">
