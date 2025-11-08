@@ -1,5 +1,5 @@
 {
-  "name": "packo-web",
+  "name": "unpako",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -17,7 +17,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "pre-commit": "pnpm run typecheck && pnpm run lint && pnpm run test:unit && pnpm run test:integration && pnpm run test:e2e"
+    "pre-commit": "lint-staged"
   },
   "dependencies": {
     "@mantine/carousel": "^8.3.6",
@@ -65,10 +65,17 @@
     "globals": "^16.4.0",
     "husky": "^9.1.7",
     "jsdom": "^27.1.0",
+    "lint-staged": "^16.2.6",
     "playwright": "^1.56.1",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.45.0",
     "vite": "^7.1.7",
     "vitest": "^4.0.8"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }

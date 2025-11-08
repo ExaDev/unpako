@@ -21,6 +21,9 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
+      // Use tab indentation
+      'indent': ['error', 'tab'],
+
       // Disallow unused variables
       '@typescript-eslint/no-unused-vars': 'error',
 
@@ -53,6 +56,30 @@ export default defineConfig([
     },
     rules: {
       'packo-web/no-emojis': 'error'
+    }
+  },
+  {
+    files: ['**/*.test.{ts,tsx}', '**/*.unit.test.{ts,tsx}', '**/*.integration.test.{ts,tsx}', '**/*.component.test.{ts,tsx}', '**/*.e2e.test.{ts,tsx}'],
+    rules: {
+      // Allow eslint-disable in test files
+      'no-warning-comments': 'off',
+
+      // Allow @ts-ignore in test files
+      '@typescript-eslint/ban-ts-comment': 'off',
+
+      // Allow type coercion in test files
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+
+      // Allow unused variables in test files (for test setup)
+      '@typescript-eslint/no-unused-vars': 'off',
+
+      // Allow underscore-prefixed variables in test files
+      '@typescript-eslint/naming-convention': 'off'
     }
   }
 ])

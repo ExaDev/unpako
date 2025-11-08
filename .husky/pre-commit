@@ -9,13 +9,13 @@ if [ $? -ne 0 ]; then
 fi
 echo "SUCCESS: TypeScript type checking passed"
 
-echo "2. Running ESLint..."
-pnpm run lint
+echo "2. Running lint-staged..."
+pnpm exec lint-staged
 if [ $? -ne 0 ]; then
-  echo "ERROR: ESLint failed"
+  echo "ERROR: lint-staged failed"
   exit 1
 fi
-echo "SUCCESS: ESLint passed"
+echo "SUCCESS: lint-staged passed"
 
 echo "3. Running unit tests..."
 # Create simple test if none exist

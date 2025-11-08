@@ -31,7 +31,7 @@
     "noUncheckedSideEffectImports": true,
 
     /* Vitest types */
-    "types": ["vite/client", "vitest/globals", "@vitest/browser/providers/playwright"]
+    "types": ["vite/client", "vitest/globals"]
   },
   "include": ["src"]
 }
