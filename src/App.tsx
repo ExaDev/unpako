@@ -8,7 +8,8 @@ import {
   Button,
   Card,
   Badge,
-  Divider
+  Divider,
+  MantineProvider
 } from '@mantine/core';
 import {
   IconUpload,
@@ -52,7 +53,8 @@ function App() {
   }, [activeTab]);
 
   return (
-    <Container size="xl" py="xl">
+    <MantineProvider>
+      <Container size="xl" py="xl">
       {/* Header */}
       <Card withBorder p="md" mb="xl">
         <Group justify="space-between">
@@ -146,6 +148,7 @@ function App() {
         )}
       </Stack>
     </Container>
+    </MantineProvider>
   );
 }
 
