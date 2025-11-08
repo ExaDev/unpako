@@ -1,7 +1,27 @@
 import { useState, useEffect } from "react";
-import { Container, Title, Text, Stack, Group, Button, Card, Badge, Divider } from "@mantine/core";
-import { IconUpload, IconDownload, IconHistory, IconPackage } from "@tabler/icons-react";
-import { FileUpload } from "./FileUpload";
+import {
+	Container,
+	Title,
+	Text,
+	Stack,
+	Group,
+	Button,
+	Card,
+	Badge,
+	Divider,
+	Textarea,
+	Alert,
+	TextInput,
+	FileInput,
+} from "@mantine/core";
+import {
+	IconFileText,
+	IconDownload,
+	IconHistory,
+	IconPackage,
+	IconAlertCircle,
+	IconUpload,
+} from "@tabler/icons-react";
 import { FileDownload } from "./FileDownload";
 import { HistoryView } from "./HistoryView";
 import { ThemeToggle } from "./ThemeToggle";
@@ -11,17 +31,31 @@ import { HistoryStorage } from "../utils/historyStorage";
 function AppContent() {
 	const [activeTab, setActiveTab] = useState("upload");
 	const [stats, setStats] = useState(HistoryStorage.getStats());
+	const [codeInput, setCodeInput] = useState("");
+	const [fileName, setFileName] = useState("");
 
 	const updateStats = () => {
 		setStats(HistoryStorage.getStats());
 	};
 
-	const handleFileCompressed = (compressedFile: CompressedFile, url: string) => {
-		// TODO: Use compressedFile and url for history storage in future
-		void compressedFile;
-		void url;
-		setActiveTab("upload"); // Stay on upload tab
-		updateStats();
+	const handleFileUpload = (file: File) => {
+		if (file) {
+			// Set filename with extension
+			setFileName(file.name);
+
+			// Read file content
+			const reader = new FileReader();
+			reader.onload = e => {
+				const content = e.target?.result as string;
+				setCodeInput(content);
+			};
+			reader.onerror = () => {
+				console.error("Error reading file");
+			};
+
+			// Read as text
+			reader.readAsText(file);
+		}
 	};
 
 	const handleFileDownloaded = (compressedFile: CompressedFile) => {
@@ -53,7 +87,7 @@ function AppContent() {
 								Unpako
 							</Title>
 							<Text size="sm" c="dimmed">
-								Share large files via compressed URLs
+								Share code and text via compressed URLs
 							</Text>
 						</div>
 					</Group>
@@ -78,9 +112,9 @@ function AppContent() {
 					<Button
 						variant={activeTab === "upload" ? "filled" : "subtle"}
 						onClick={() => setActiveTab("upload")}
-						leftSection={<IconUpload size={16} />}
+						leftSection={<IconFileText size={16} />}
 					>
-						Upload & Compress
+						Text Compressor
 					</Button>
 					<Button
 						variant={activeTab === "download" ? "filled" : "subtle"}
@@ -103,22 +137,85 @@ function AppContent() {
 				{activeTab === "upload" && (
 					<div>
 						<Title order={2} mb="lg">
-							Upload & Compress Files
+							Text Compressor
 						</Title>
 						<Text size="lg" c="dimmed" mb="xl">
-							Compress your files and share them via URL. No size limitations!
+							Compress your text and share it via URL. Perfect for sharing configurations, logs, documents,
+							or any text content!
 						</Text>
-						<FileUpload onFileCompressed={handleFileCompressed} />
+
+						<Stack gap="md">
+							<FileInput
+								value={null}
+								label="Or Upload File"
+								description="Upload a text file to auto-populate filename and content"
+								placeholder="Click to select file or drag and drop"
+								accept=".txt,.json,.js,.ts,.jsx,.tsx,.py,.java,.cpp,.c,.h,.css,.scss,.html,.xml,.yaml,.yml,.md,.log,.conf,.config,.env"
+								onChange={handleFileUpload}
+								leftSection={<IconUpload size={16} />}
+								clearable
+							/>
+
+							<TextInput
+								placeholder="Enter filename with extension (e.g., config.json, script.py, document.txt)"
+								label="Filename"
+								description="Optional: Specify a filename with extension for better organization"
+								value={fileName}
+								onChange={event => setFileName(event.currentTarget.value)}
+								leftSection={<IconFileText size={16} />}
+							/>
+
+							<Textarea
+								placeholder="Paste your text, configuration, or any content here..."
+								label="Text Input"
+								description="Supports any text content with proper formatting preserved"
+								minRows={10}
+								maxRows={25}
+								value={codeInput}
+								onChange={event => setCodeInput(event.currentTarget.value)}
+								fontFamily="monospace"
+								resize="vertical"
+								autosize
+							/>
+
+							{codeInput.length > 0 && (
+								<Alert icon={<IconAlertCircle size={16} />} title="Text Ready" color="blue" variant="light">
+									{codeInput.length} characters ready for compression.
+									{codeInput.split("\n").length > 1 && ` ${codeInput.split("\n").length} lines detected.`}
+									{fileName && ` Filename: ${fileName}`}
+								</Alert>
+							)}
+
+							<Group justify="flex-end">
+								<Button
+									variant="light"
+									onClick={() => {
+										setCodeInput("");
+										setFileName("");
+									}}
+									disabled={!codeInput && !fileName}
+								>
+									Clear
+								</Button>
+								<Button
+									variant="filled"
+									disabled={!codeInput.trim()}
+									leftSection={<IconFileText size={16} />}
+								>
+									Compress & Share
+								</Button>
+							</Group>
+						</Stack>
 					</div>
 				)}
 
 				{activeTab === "download" && (
 					<div>
 						<Title order={2} mb="lg">
-							Download & Decompress Files
+							Download & Decompress Text
 						</Title>
 						<Text size="lg" c="dimmed" mb="xl">
-							Paste a sharing URL to download the original file.
+							Paste a sharing URL to download the original text content.
 						</Text>
 						<FileDownload onFileDownloaded={handleFileDownloaded} />
 					</div>
@@ -127,10 +224,10 @@ function AppContent() {
 				{activeTab === "history" && (
 					<div>
 						<Title order={2} mb="lg">
-							File History
+							Compression History
 						</Title>
 						<Text size="lg" c="dimmed" mb="xl">
-							View and manage your uploaded and downloaded files.
+							View and manage your compressed text history.
 						</Text>
 						<HistoryView onHistoryItemSelected={handleHistoryItemSelected} />
 					</div>
