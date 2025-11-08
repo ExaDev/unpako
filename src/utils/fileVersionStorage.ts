@@ -6,9 +6,9 @@ export class FileVersionStorage {
 	// Get latest version of all files (for file tree)
 	static async getLatestFiles(): Promise<FileVersion[]> {
 		const items = await safeDbOperation(async () => {
-			return await db.fileVersions.where("isLatest").equals(true).toArray();
+			return await db.fileVersions.filter(item => item.isLatest).toArray();
 		});
-		return items || [];
+		return (items as FileVersion[]) || [];
 	}
 
 	// Get all versions of a specific file
@@ -16,32 +16,35 @@ export class FileVersionStorage {
 		const items = await safeDbOperation(async () => {
 			return await db.fileVersions.where("filepath").equals(filepath).reverse().toArray();
 		});
-		return items || [];
+		return (items as FileVersion[]) || [];
 	}
 
 	// Get specific version of a file
 	static async getFileVersion(filepath: string, versionId: string): Promise<FileVersion | null> {
-		return safeDbOperation(async () => {
+		const result = await safeDbOperation(async () => {
 			return await db.fileVersions
 				.where("versionId")
 				.equals(versionId)
 				.and(item => item.filepath === filepath)
 				.first();
 		});
+		return result || null;
 	}
 
 	// Get latest version of a specific file
 	static async getLatestFileVersion(filepath: string): Promise<FileVersion | null> {
-		return safeDbOperation(async () => {
+		const result = await safeDbOperation(async () => {
 			return await db.fileVersions.where({ filepath, isLatest: true }).first();
 		});
+		return result || null;
 	}
 
 	// Get file metadata
 	static async getFileMetadata(filepath: string): Promise<FileMetadata | null> {
-		return safeDbOperation(async () => {
+		const result = await safeDbOperation(async () => {
 			return await db.fileMetadata.get(filepath);
 		});
+		return result || null;
 	}
 
 	// Get all file metadata
@@ -228,9 +231,10 @@ export class FileVersionStorage {
 				// Process each file
 				for (const [filepath, versions] of Object.entries(fileGroups)) {
 					// Sort by version number to ensure correct order
-					versions.sort((a, b) => (a.version || 1) - (b.version || 1));
+					const typedVersions = versions as (FileVersion & { version?: number })[];
+					typedVersions.sort((a, b) => (a.version || 1) - (b.version || 1));
 
-					for (const version of versions) {
+					for (const version of typedVersions) {
 						// Check if version already exists
 						const existing = await this.getFileVersion(filepath, version.versionId);
 						if (existing) {
@@ -265,7 +269,9 @@ export class FileVersionStorage {
 		return this.getLatestFiles();
 	}
 
-	static async addToHistory(item: Omit<CompressedFile, "filepath">): Promise<void> {
+	static async addToHistory(
+		item: Omit<CompressedFile, "filepath"> & { filepath?: string }
+	): Promise<void> {
 		// For compatibility, generate a filepath if not provided
 		const filepath = item.filepath || `untitled/${Date.now()}`;
 
@@ -273,7 +279,7 @@ export class FileVersionStorage {
 			size: item.size,
 			compressedSize: item.compressedSize,
 			data: item.data,
-			url: item.url,
+			url: (item as CompressedFile & { url?: string }).url,
 		});
 	}
 
