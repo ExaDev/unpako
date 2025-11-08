@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/ExaDev/unpako/compare/v1.2.0...v1.2.1) (2025-11-08)
+
+
+### Bug Fixes
+
+* move loadVersions declaration before useEffect to resolve build error ([d441d84](https://github.com/ExaDev/unpako/commit/d441d847a3f3c01b6fd0e8dd89aef1bf1959e39a))
+* resolve CI warnings ([d96e182](https://github.com/ExaDev/unpako/commit/d96e1828644294a7a96cd735d2e7608939200b69))
+
 # [1.2.0](https://github.com/ExaDev/unpako/compare/v1.1.2...v1.2.0) (2025-11-08)
 
 
