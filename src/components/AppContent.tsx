@@ -1,141 +1,47 @@
 import { useState, useEffect } from "react";
-import {
-	Container,
-	Title,
-	Text,
-	Stack,
-	Group,
-	Button,
-	Card,
-	Badge,
-	Divider,
-	Textarea,
-	Alert,
-	TextInput,
-	FileInput,
-	Tooltip,
-	Box,
-} from "@mantine/core";
-import { CodeHighlight } from "@mantine/code-highlight";
-import {
-	IconFileText,
-	IconDownload,
-	IconHistory,
-	IconPackage,
-	IconAlertCircle,
-	IconUpload,
-	IconCopy,
-	IconCheck,
-	IconCode,
-	IconEdit,
-} from "@tabler/icons-react";
+import { Container, Title, Text, Group, Card, Badge, Grid, Box, Notification } from "@mantine/core";
+import { IconPackage, IconCheck, IconLink } from "@tabler/icons-react";
 import { FileDownload } from "./FileDownload";
-import { HistoryView } from "./HistoryView";
+import { FileTreeSidebar } from "./FileTreeSidebar";
+import { FileEditor } from "./FileEditor";
 import { ThemeToggle } from "./ThemeToggle";
-import type { CompressedFile, FileHistoryItem } from "../utils/fileCompression";
+import type { FileHistoryItem } from "../utils/db";
 import { DexieHistoryStorage } from "../utils/dexieHistoryStorage";
-import { compressText, fileToUrl } from "../utils/fileCompression";
-import { detectLanguage } from "../utils/languageDetection";
+import { generateShareableUrl } from "../utils/fileCompression";
 import pako from "pako";
 
 function AppContent() {
-	const [activeTab, setActiveTab] = useState("upload");
-	const [stats, setStats] = useState({
-		totalItems: 0,
-		totalSize: 0,
-		totalCompressedSize: 0,
-		uploadedCount: 0,
-		downloadedCount: 0,
-	});
+	const [files, setFiles] = useState<FileHistoryItem[]>([]);
+	const [selectedFile, setSelectedFile] = useState<FileHistoryItem | null>(null);
 	const [codeInput, setCodeInput] = useState("");
 	const [filepath, setFilepath] = useState("");
-	const [shareableUrl, setShareableUrl] = useState("");
-	const [copied, setCopied] = useState(false);
-	const [isInitialLoad, setIsInitialLoad] = useState(true);
 	const [isEditMode, setIsEditMode] = useState(true);
+	const [showNotification, setShowNotification] = useState<{
+		type: "success" | "error";
+		message: string;
+	} | null>(null);
 
-	const updateStats = async () => {
-		const newStats = await DexieHistoryStorage.getStats();
-		setStats(newStats);
+	const stats = {
+		totalItems: files.length,
+		totalSize: files.reduce((sum, file) => sum + file.size, 0),
+		compressedSize: files.reduce((sum, file) => sum + file.compressedSize, 0),
+		totalUploaded: files.filter(file => file.type === "uploaded").length,
+		totalDownloaded: files.filter(file => file.type === "downloaded").length,
 	};
 
-	const handleFileUpload = (file: File | null) => {
-		if (file) {
-			// Set filepath with extension
-			setFilepath(file.name);
-
-			// Read file content
-			const reader = new FileReader();
-			reader.onload = e => {
-				const content = e.target?.result as string;
-				setCodeInput(content);
-			};
-			reader.onerror = () => {
-				console.error("Error reading file");
-			};
-
-			// Read as text
-			reader.readAsText(file);
-		}
-	};
-
-	// Generate shareable URL whenever content or filepath changes (but not during initial load)
+	// Load files from storage on mount
 	useEffect(() => {
-		// Skip URL generation during initial load from URL
-		if (isInitialLoad) return;
-
-		if (codeInput.trim()) {
-			try {
-				const compressedFile = compressText(codeInput, filepath || "content.txt");
-				const url = fileToUrl(compressedFile);
-				setShareableUrl(url);
-				// Update browser URL without page reload
-				window.history.pushState({ path: url }, "", url);
-			} catch (error) {
-				console.error("Error generating URL:", error);
-				setShareableUrl("");
-			}
-		} else {
-			setShareableUrl("");
-			// Clear URL parameters when content is empty
-			const cleanUrl = window.location.origin + window.location.pathname;
-			window.history.pushState({ path: cleanUrl }, "", cleanUrl);
-		}
-	}, [codeInput, filepath, isInitialLoad]);
-
-	const copyToClipboard = async () => {
-		if (shareableUrl) {
-			try {
-				// Copy current browser URL instead of stored URL
-				await navigator.clipboard.writeText(window.location.href);
-				setCopied(true);
-				setTimeout(() => setCopied(false), 2000);
-			} catch (error) {
-				console.error("Failed to copy URL:", error);
-			}
-		}
-	};
-
-	const handleFileDownloaded = async (compressedFile: CompressedFile) => {
-		// TODO: Use compressedFile for history storage in future
-		void compressedFile;
-		setActiveTab("download"); // Stay on download tab
-		await updateStats();
-	};
-
-	const handleHistoryItemSelected = (item: FileHistoryItem) => {
-		// Switch to appropriate tab based on history item type
-		setActiveTab(item.type === "uploaded" ? "upload" : "download");
-	};
+		loadFiles();
+	}, []);
 
 	// Load content from URL on mount
 	useEffect(() => {
 		const urlParams = new URLSearchParams(window.location.search);
 		const data = urlParams.get("data");
-		const filepath = urlParams.get("filepath");
+		const urlFilepath = urlParams.get("filepath");
 		const name = urlParams.get("name"); // For backward compatibility
 
-		if (data && (filepath || name)) {
+		if (data && (urlFilepath || name)) {
 			try {
 				const decodedData = decodeURIComponent(data);
 				// Decompress the content
@@ -144,32 +50,88 @@ function AppContent() {
 				const content = new TextDecoder().decode(decompressed);
 
 				setCodeInput(content);
-				setFilepath(filepath || name || "content.txt");
-				// Set initial load flag to prevent immediate URL regeneration
-				setTimeout(() => setIsInitialLoad(false), 100);
+				setFilepath(urlFilepath || name || "content.txt");
 			} catch (error) {
 				console.error("Failed to load content from URL:", error);
-				setIsInitialLoad(false);
 			}
-		} else {
-			setIsInitialLoad(false);
 		}
-	}, []); // Only run once on mount
+	}, []);
 
-	// Load stats on mount
-	useEffect(() => {
-		void updateStats();
-	}, []); // Only run once on mount
+	const loadFiles = async () => {
+		try {
+			const historyFiles = await DexieHistoryStorage.getAllItems();
+			setFiles(historyFiles);
+		} catch (error) {
+			console.error("Error loading files:", error);
+		}
+	};
 
-	// Update stats when tab changes
-	useEffect(() => {
-		void updateStats();
-	}, [activeTab]);
+	const handleFileSelect = (file: FileHistoryItem) => {
+		setSelectedFile(file);
+	};
+
+	const handleFileUpload = () => {
+		// This is handled in FileEditor component
+	};
+
+	const handleUpdateHistory = async (item: FileHistoryItem) => {
+		try {
+			await DexieHistoryStorage.addItem(item);
+			await loadFiles(); // Refresh files list
+		} catch (error) {
+			console.error("Error updating history:", error);
+		}
+	};
+
+	const handleShare = async () => {
+		if (codeInput.trim() && filepath.trim()) {
+			try {
+				const url = generateShareableUrl(codeInput, filepath);
+				await navigator.clipboard.writeText(url);
+				setShowNotification({ type: "success", message: "URL copied to clipboard!" });
+				// Update browser URL
+				window.history.pushState({ path: url }, "", url);
+			} catch (error) {
+				setShowNotification({ type: "error", message: "Failed to copy URL" });
+				console.error("Error copying URL:", error);
+			}
+		}
+	};
+
+	const handleDownload = () => {
+		if (filepath && codeInput) {
+			const blob = new Blob([codeInput], { type: "text/plain" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = filepath.split("/").pop() || "download.txt";
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+		}
+	};
+
+	const handleDelete = async () => {
+		if (selectedFile) {
+			try {
+				await DexieHistoryStorage.deleteItem(selectedFile.id);
+				await loadFiles();
+				setSelectedFile(null);
+				setCodeInput("");
+				setFilepath("");
+				setShowNotification({ type: "success", message: "File deleted successfully" });
+			} catch (error) {
+				setShowNotification({ type: "error", message: "Failed to delete file" });
+				console.error("Error deleting file:", error);
+			}
+		}
+	};
 
 	return (
-		<Container size="xl" py="xl">
+		<Container size="xl" py="xl" h="100vh" style={{ display: "flex", flexDirection: "column" }}>
 			{/* Header */}
-			<Card withBorder p="md" mb="xl">
+			<Card withBorder p="md" mb="lg">
 				<Group justify="space-between">
 					<Group>
 						<IconPackage size={32} color="#1c7ed6" />
@@ -188,202 +150,63 @@ function AppContent() {
 							{stats.totalItems} files
 						</Badge>
 						<Badge color="green" variant="light" size="lg">
-							{stats.uploadedCount} uploaded
+							{stats.totalUploaded} uploaded
 						</Badge>
 						<Badge color="orange" variant="light" size="lg">
-							{stats.downloadedCount} downloaded
+							{stats.totalDownloaded} downloaded
 						</Badge>
 						<ThemeToggle />
 					</Group>
 				</Group>
-
-				<Divider my="md" />
-
-				<Group gap="md">
-					<Button
-						variant={activeTab === "upload" ? "filled" : "subtle"}
-						onClick={() => setActiveTab("upload")}
-						leftSection={<IconFileText size={16} />}
-					>
-						Text Compressor
-					</Button>
-					<Button
-						variant={activeTab === "download" ? "filled" : "subtle"}
-						onClick={() => setActiveTab("download")}
-						leftSection={<IconDownload size={16} />}
-					>
-						Download & Decompress
-					</Button>
-					<Button
-						variant={activeTab === "history" ? "filled" : "subtle"}
-						onClick={() => setActiveTab("history")}
-						leftSection={<IconHistory size={16} />}
-					>
-						History
-					</Button>
-				</Group>
 			</Card>
 
-			<Stack gap="xl">
-				{activeTab === "upload" && (
-					<div>
-						<Title order={2} mb="lg">
-							Text Compressor
-						</Title>
-						<Text size="lg" c="dimmed" mb="xl">
-							Compress your text and share it via URL. Perfect for sharing configurations, logs, documents,
-							or any text content!
-						</Text>
+			{/* Notification */}
+			{showNotification && (
+				<Box mb="md">
+					<Notification
+						color={showNotification.type === "success" ? "green" : "red"}
+						onClose={() => setShowNotification(null)}
+						icon={showNotification.type === "success" ? <IconCheck size={16} /> : <IconLink size={16} />}
+					>
+						{showNotification.message}
+					</Notification>
+				</Box>
+			)}
 
-						<Stack gap="md">
-							<FileInput
-								value={null}
-								label="Or Upload File"
-								description="Upload a text file to auto-populate filename and content"
-								placeholder="Click to select file or drag and drop"
-								accept=".txt,.json,.js,.ts,.jsx,.tsx,.py,.java,.cpp,.c,.h,.css,.scss,.html,.xml,.yaml,.yml,.md,.log,.conf,.config,.env"
-								onChange={handleFileUpload}
-								leftSection={<IconUpload size={16} />}
-								clearable
-							/>
+			{/* Main Content Grid */}
+			<Grid h="100%" style={{ flex: 1, minHeight: 0 }}>
+				{/* File Tree Sidebar */}
+				<Grid.Col span={{ base: 12, md: 4, lg: 3 }}>
+					<FileTreeSidebar
+						files={files}
+						selectedFile={selectedFile}
+						onFileSelect={handleFileSelect}
+						onUpload={handleFileUpload}
+						stats={stats}
+					/>
+				</Grid.Col>
 
-							<TextInput
-								placeholder="Enter filepath with extension (e.g., config.json, scripts/main.py, docs/document.txt)"
-								label="Filepath"
-								description="Optional: Specify a full filepath with extension for better organization (e.g., 'foo/bar/baz.txt')"
-								value={filepath}
-								onChange={event => setFilepath(event.currentTarget.value)}
-								styles={{
-									input: {
-										fontFamily: "monospace",
-									},
-								}}
-								leftSection={<IconFileText size={16} />}
-							/>
+				{/* File Editor */}
+				<Grid.Col span={{ base: 12, md: 8, lg: 9 }}>
+					<FileEditor
+						file={selectedFile}
+						content={codeInput}
+						filepath={filepath}
+						isEditMode={isEditMode}
+						onContentChange={setCodeInput}
+						onFilepathChange={setFilepath}
+						onEditModeToggle={() => setIsEditMode(!isEditMode)}
+						onFileUpload={handleFileUpload}
+						onDownload={handleDownload}
+						onShare={handleShare}
+						onDelete={handleDelete}
+						onUpdateHistory={handleUpdateHistory}
+					/>
+				</Grid.Col>
+			</Grid>
 
-							<Group justify="space-between" mb="xs">
-								<Text size="sm" fw={500}>
-									{isEditMode ? "Text Input" : "Syntax Highlighted Preview"}
-								</Text>
-								<Tooltip label={isEditMode ? "Preview with syntax highlighting" : "Edit text"}>
-									<Button
-										variant="subtle"
-										size="xs"
-										leftSection={isEditMode ? <IconCode size={14} /> : <IconEdit size={14} />}
-										onClick={() => setIsEditMode(!isEditMode)}
-									>
-										{isEditMode ? "Preview" : "Edit"}
-									</Button>
-								</Tooltip>
-							</Group>
-
-							{isEditMode ? (
-								<Textarea
-									placeholder="Paste your text, configuration, or any content here..."
-									description="Supports any text content with proper formatting preserved"
-									minRows={10}
-									maxRows={25}
-									value={codeInput}
-									onChange={event => setCodeInput(event.currentTarget.value)}
-									styles={{
-										input: {
-											fontFamily: "monospace",
-										},
-									}}
-									resize="vertical"
-									autosize
-								/>
-							) : (
-								<Box
-									style={{
-										maxHeight: "400px",
-										overflow: "auto",
-										border: "1px solid var(--mantine-color-gray-3)",
-										borderRadius: "var(--mantine-radius-default)",
-									}}
-								>
-									<CodeHighlight
-										code={codeInput || "// No content to preview"}
-										language={detectLanguage(filepath, codeInput)}
-										withCopyButton
-									/>
-								</Box>
-							)}
-
-							{codeInput.length > 0 && (
-								<Alert icon={<IconAlertCircle size={16} />} title="Text Ready" color="blue" variant="light">
-									{codeInput.length} characters ready for compression.
-									{codeInput.split("\n").length > 1 && ` ${codeInput.split("\n").length} lines detected.`}
-									{filepath && ` Filepath: ${filepath}`}
-								</Alert>
-							)}
-
-							{shareableUrl && (
-								<Alert
-									icon={<IconDownload size={16} />}
-									title="Ready to Share"
-									color="green"
-									variant="light"
-								>
-									<Text size="sm" mb="sm">
-										Your content has been compressed. The browser URL has been updated with your shareable
-										link.
-									</Text>
-									<Group justify="flex-end">
-										<Tooltip label={copied ? "Copied!" : "Copy URL"} withinPortal>
-											<Button
-												variant="light"
-												color={copied ? "teal" : "blue"}
-												leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-												onClick={copyToClipboard}
-											>
-												{copied ? "Copied!" : "Copy URL"}
-											</Button>
-										</Tooltip>
-									</Group>
-								</Alert>
-							)}
-
-							<Group justify="flex-end">
-								<Button
-									variant="light"
-									onClick={() => {
-										setCodeInput("");
-										setFilepath("");
-									}}
-									disabled={!codeInput && !filepath}
-								>
-									Clear
-								</Button>
-							</Group>
-						</Stack>
-					</div>
-				)}
-
-				{activeTab === "download" && (
-					<div>
-						<Title order={2} mb="lg">
-							Download & Decompress Text
-						</Title>
-						<Text size="lg" c="dimmed" mb="xl">
-							Paste a sharing URL to download the original text content.
-						</Text>
-						<FileDownload onFileDownloaded={handleFileDownloaded} />
-					</div>
-				)}
-
-				{activeTab === "history" && (
-					<div>
-						<Title order={2} mb="lg">
-							Compression History
-						</Title>
-						<Text size="lg" c="dimmed" mb="xl">
-							View and manage your compressed text history.
-						</Text>
-						<HistoryView onHistoryItemSelected={handleHistoryItemSelected} />
-					</div>
-				)}
-			</Stack>
+			{/* FileDownload Modal (hidden by default) */}
+			<FileDownload onFileDownloaded={loadFiles} />
 		</Container>
 	);
 }
