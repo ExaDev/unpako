@@ -30,14 +30,6 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
   const [downloadReady, setDownloadReady] = useState<CompressedFile | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Check URL on component mount for initial load
-  useEffect(() => {
-    const currentUrl = window.location.href;
-    if (currentUrl.includes('?data=')) {
-      handleUrlProcess(currentUrl);
-    }
-  }, [handleUrlProcess]);
-
   const handleUrlProcess = useCallback(async (url: string) => {
     setIsLoading(true);
     setError(null);
@@ -60,16 +52,22 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
       setDownloadReady(compressedFile);
 
       // Update URL input if it was from page load
-      if (url !== urlInput) {
-        setUrlInput(url);
-      }
+      setUrlInput(url);
 
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to process URL');
     } finally {
       setIsLoading(false);
     }
-  }, [urlInput]);
+  }, []);
+
+  // Check URL on component mount for initial load
+  useEffect(() => {
+    const currentUrl = window.location.href;
+    if (currentUrl.includes('?data=')) {
+      handleUrlProcess(currentUrl);
+    }
+  }, [handleUrlProcess]);
 
   const handleUrlSubmit = (e: React.FormEvent) => {
     e.preventDefault();

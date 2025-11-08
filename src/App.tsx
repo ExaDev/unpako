@@ -31,16 +31,12 @@ function App() {
     setStats(HistoryStorage.getStats());
   };
 
-  const handleFileCompressed = (compressedFile: CompressedFile, url: string) => {
-    // Store file in history
-    HistoryStorage.addUploadedFile(compressedFile, url);
+  const handleFileCompressed = (_compressedFile: CompressedFile, _url: string) => {
     setActiveTab('upload'); // Stay on upload tab
     updateStats();
   };
 
-  const handleFileDownloaded = (compressedFile: CompressedFile) => {
-    // Store file in history
-    HistoryStorage.addDownloadedFile(compressedFile);
+  const handleFileDownloaded = (_compressedFile: CompressedFile) => {
     setActiveTab('download'); // Stay on download tab
     updateStats();
   };
