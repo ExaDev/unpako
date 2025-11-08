@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect } from 'react';
+import { MantineProvider, createTheme } from '@mantine/core';
 import type { ReactNode } from 'react';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
@@ -82,6 +83,11 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     }
   };
 
+  const mantineTheme = createTheme({
+    primaryColor: 'blue',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  });
+
   const value: ThemeContextType = {
     theme,
     effectiveTheme,
@@ -91,11 +97,13 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   return (
     <ThemeContext.Provider value={value}>
-      {children}
+      <MantineProvider theme={mantineTheme} forceColorScheme={effectiveTheme}>
+        {children}
+      </MantineProvider>
     </ThemeContext.Provider>
   );
 }
 
 export { ThemeContext };
-export type { ThemeMode, ThemeContextType };
+export type { ThemeContextType };
 
