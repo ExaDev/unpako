@@ -78,8 +78,6 @@ export class DexieHistoryStorage {
 		totalItems: number;
 		totalSize: number;
 		totalCompressedSize: number;
-		uploadedCount: number;
-		downloadedCount: number;
 	}> {
 		const history = await this.getHistory();
 
@@ -87,8 +85,6 @@ export class DexieHistoryStorage {
 			totalItems: history.length,
 			totalSize: history.reduce((sum, item) => sum + item.size, 0),
 			totalCompressedSize: history.reduce((sum, item) => sum + item.compressedSize, 0),
-			uploadedCount: history.filter(item => item.type === "uploaded").length,
-			downloadedCount: history.filter(item => item.type === "downloaded").length,
 		};
 	}
 
@@ -114,7 +110,6 @@ export class DexieHistoryStorage {
 				compressedSize: item.compressedSize,
 				modifiedAt: item.modifiedAt,
 				url: item.url,
-				type: item.type,
 			});
 		} else {
 			// Add new item (without id, as addToHistory will generate one)
@@ -126,7 +121,6 @@ export class DexieHistoryStorage {
 				createdAt: item.createdAt,
 				modifiedAt: item.modifiedAt,
 				url: item.url,
-				type: item.type,
 			});
 		}
 	}

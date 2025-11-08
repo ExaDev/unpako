@@ -96,8 +96,6 @@ export class HistoryStorage {
 		totalItems: number;
 		totalSize: number;
 		totalCompressedSize: number;
-		uploadedCount: number;
-		downloadedCount: number;
 	} {
 		const history = this.getHistory();
 
@@ -105,8 +103,6 @@ export class HistoryStorage {
 			totalItems: history.length,
 			totalSize: history.reduce((sum, item) => sum + item.size, 0),
 			totalCompressedSize: history.reduce((sum, item) => sum + item.compressedSize, 0),
-			uploadedCount: history.filter(item => item.type === "uploaded").length,
-			downloadedCount: history.filter(item => item.type === "downloaded").length,
 		};
 	}
 
