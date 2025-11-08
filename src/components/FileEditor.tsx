@@ -22,7 +22,7 @@ import {
 	IconLink,
 	IconTrash,
 } from "@tabler/icons-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { FileHistoryItem } from "../utils/db";
 import {
 	decompressData,
@@ -83,34 +83,7 @@ export function FileEditor({
 		}
 	}, [file, onContentChange, onFilepathChange]);
 
-	// Generate URL when content changes
-	useEffect(() => {
-		if (content.trim()) {
-			const url = generateShareableUrl(content, filepath);
-			setShareableUrl(url);
-			// Only update browser URL automatically after initial load
-			if (!isInitialLoad) {
-				window.history.pushState({ path: url }, "", url);
-			}
-			// Update history in background
-			updateHistoryWithCurrentContent();
-		} else {
-			setShareableUrl("");
-			// Clear URL parameters when content is empty (only after initial load)
-			if (!isInitialLoad) {
-				window.history.pushState({}, "", window.location.pathname);
-			}
-		}
-	}, [content, filepath, isInitialLoad]);
-
-	// Set isInitialLoad to false after first content update
-	useEffect(() => {
-		if (isInitialLoad && (content.trim() || filepath.trim())) {
-			setIsInitialLoad(false);
-		}
-	}, [content, filepath, isInitialLoad]);
-
-	const updateHistoryWithCurrentContent = async () => {
+	const updateHistoryWithCurrentContent = useCallback(async () => {
 		if (!content.trim() || !filepath.trim()) return;
 
 		try {
@@ -133,7 +106,34 @@ export function FileEditor({
 		} catch (error) {
 			console.error("Error updating history:", error);
 		}
-	};
+	}, [content, filepath, file, onUpdateHistory]);
+
+	// Generate URL when content changes
+	useEffect(() => {
+		if (content.trim()) {
+			const url = generateShareableUrl(content, filepath);
+			setShareableUrl(url);
+			// Only update browser URL automatically after initial load
+			if (!isInitialLoad) {
+				window.history.pushState({ path: url }, "", url);
+			}
+			// Update history in background
+			updateHistoryWithCurrentContent();
+		} else {
+			setShareableUrl("");
+			// Clear URL parameters when content is empty (only after initial load)
+			if (!isInitialLoad) {
+				window.history.pushState({}, "", window.location.pathname);
+			}
+		}
+	}, [content, filepath, isInitialLoad, updateHistoryWithCurrentContent]);
+
+	// Set isInitialLoad to false after first content update
+	useEffect(() => {
+		if (isInitialLoad && (content.trim() || filepath.trim())) {
+			setIsInitialLoad(false);
+		}
+	}, [content, filepath, isInitialLoad]);
 
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const uploadedFile = event.target.files?.[0];
