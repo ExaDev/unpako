@@ -1,3 +1,12 @@
+# [1.1.0](https://github.com/ExaDev/unpako/compare/v1.0.1...v1.1.0) (2025-11-08)
+
+
+### Features
+
+* **components:** add file tree sidebar components ([ef5edb6](https://github.com/ExaDev/unpako/commit/ef5edb6652b810ae362e7c90df60d4928a2df866))
+* **components:** add FileEditor with automatic URL updates ([df305f9](https://github.com/ExaDev/unpako/commit/df305f9fbdd006a4826ec875a450af6a553ed19e))
+* **utils:** enhance storage utilities and compression functions ([11c9c9d](https://github.com/ExaDev/unpako/commit/11c9c9dc1d07d8de5bc4b429d4fbd39e38534deb))
+
 ## [1.0.1](https://github.com/ExaDev/unpako/compare/v1.0.0...v1.0.1) (2025-11-08)
 
 # 1.0.0 (2025-11-08)
