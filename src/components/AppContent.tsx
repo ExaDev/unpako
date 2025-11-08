@@ -13,6 +13,7 @@ import {
 	Alert,
 	TextInput,
 	FileInput,
+	Tooltip,
 } from "@mantine/core";
 import {
 	IconFileText,
@@ -21,18 +22,25 @@ import {
 	IconPackage,
 	IconAlertCircle,
 	IconUpload,
+	IconCopy,
+	IconCheck,
 } from "@tabler/icons-react";
 import { FileDownload } from "./FileDownload";
 import { HistoryView } from "./HistoryView";
 import { ThemeToggle } from "./ThemeToggle";
 import type { CompressedFile, FileHistoryItem } from "../utils/fileCompression";
 import { HistoryStorage } from "../utils/historyStorage";
+import { compressText, fileToUrl } from "../utils/fileCompression";
+import pako from "pako";
 
 function AppContent() {
 	const [activeTab, setActiveTab] = useState("upload");
 	const [stats, setStats] = useState(HistoryStorage.getStats());
 	const [codeInput, setCodeInput] = useState("");
 	const [fileName, setFileName] = useState("");
+	const [shareableUrl, setShareableUrl] = useState("");
+	const [copied, setCopied] = useState(false);
+	const [isInitialLoad, setIsInitialLoad] = useState(true);
 
 	const updateStats = () => {
 		setStats(HistoryStorage.getStats());
@@ -58,6 +66,43 @@ function AppContent() {
 		}
 	};
 
+	// Generate shareable URL whenever content or filename changes (but not during initial load)
+	useEffect(() => {
+		// Skip URL generation during initial load from URL
+		if (isInitialLoad) return;
+
+		if (codeInput.trim()) {
+			try {
+				const compressedFile = compressText(codeInput, fileName);
+				const url = fileToUrl(compressedFile);
+				setShareableUrl(url);
+				// Update browser URL without page reload
+				window.history.pushState({ path: url }, "", url);
+			} catch (error) {
+				console.error("Error generating URL:", error);
+				setShareableUrl("");
+			}
+		} else {
+			setShareableUrl("");
+			// Clear URL parameters when content is empty
+			const cleanUrl = window.location.origin + window.location.pathname;
+			window.history.pushState({ path: cleanUrl }, "", cleanUrl);
+		}
+	}, [codeInput, fileName, isInitialLoad]);
+
+	const copyToClipboard = async () => {
+		if (shareableUrl) {
+			try {
+				// Copy current browser URL instead of stored URL
+				await navigator.clipboard.writeText(window.location.href);
+				setCopied(true);
+				setTimeout(() => setCopied(false), 2000);
+			} catch (error) {
+				console.error("Failed to copy URL:", error);
+			}
+		}
+	};
+
 	const handleFileDownloaded = (compressedFile: CompressedFile) => {
 		// TODO: Use compressedFile for history storage in future
 		void compressedFile;
@@ -69,6 +114,33 @@ function AppContent() {
 		// Switch to appropriate tab based on history item type
 		setActiveTab(item.type === "uploaded" ? "upload" : "download");
 	};
+
+	// Load content from URL on mount
+	useEffect(() => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const data = urlParams.get("data");
+		const name = urlParams.get("name");
+
+		if (data && name) {
+			try {
+				const decodedData = decodeURIComponent(data);
+				// Decompress the content
+				const compressed = Uint8Array.from(atob(decodedData), c => c.charCodeAt(0));
+				const decompressed = pako.inflate(compressed);
+				const content = new TextDecoder().decode(decompressed);
+
+				setCodeInput(content);
+				setFileName(name);
+				// Set initial load flag to prevent immediate URL regeneration
+				setTimeout(() => setIsInitialLoad(false), 100);
+			} catch (error) {
+				console.error("Failed to load content from URL:", error);
+				setIsInitialLoad(false);
+			}
+		} else {
+			setIsInitialLoad(false);
+		}
+	}, []); // Only run once on mount
 
 	// Update stats on mount and when tab changes
 	useEffect(() => {
@@ -186,6 +258,32 @@ function AppContent() {
 								</Alert>
 							)}
 
+							{shareableUrl && (
+								<Alert
+									icon={<IconDownload size={16} />}
+									title="Ready to Share"
+									color="green"
+									variant="light"
+								>
+									<Text size="sm" mb="sm">
+										Your content has been compressed. The browser URL has been updated with your shareable
+										link.
+									</Text>
+									<Group justify="flex-end">
+										<Tooltip label={copied ? "Copied!" : "Copy URL"} withinPortal>
+											<Button
+												variant="light"
+												color={copied ? "teal" : "blue"}
+												leftSection={copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
+												onClick={copyToClipboard}
+											>
+												{copied ? "Copied!" : "Copy URL"}
+											</Button>
+										</Tooltip>
+									</Group>
+								</Alert>
+							)}
+
 							<Group justify="flex-end">
 								<Button
 									variant="light"
@@ -196,13 +294,6 @@ function AppContent() {
 									disabled={!codeInput && !fileName}
 								>
 									Clear
-								</Button>
-								<Button
-									variant="filled"
-									disabled={!codeInput.trim()}
-									leftSection={<IconFileText size={16} />}
-								>
-									Compress & Share
 								</Button>
 							</Group>
 						</Stack>
