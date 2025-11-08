@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
 	Text,
 	Group,
@@ -30,7 +30,7 @@ import {
 	IconSortAscending,
 	IconSortDescending,
 } from "@tabler/icons-react";
-import { HistoryStorage } from "../utils/historyStorage";
+import { DexieHistoryStorage } from "../utils/dexieHistoryStorage";
 import {
 	fileToUrl,
 	downloadFile,
@@ -44,7 +44,14 @@ interface HistoryViewProps {
 }
 
 export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
-	const [history, setHistory] = useState<FileHistoryItem[]>(() => HistoryStorage.getHistory());
+	const [history, setHistory] = useState<FileHistoryItem[]>([]);
+	const [stats, setStats] = useState({
+		totalItems: 0,
+		totalSize: 0,
+		totalCompressedSize: 0,
+		uploadedCount: 0,
+		downloadedCount: 0,
+	});
 	const [sortBy, setSortBy] = useState<"timestamp" | "filepath" | "size">("timestamp");
 	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 	const [showClearModal, setShowClearModal] = useState(false);
@@ -56,11 +63,17 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 		errors: string[];
 	} | null>(null);
 
-	const stats = HistoryStorage.getStats();
+	const refreshHistory = async () => {
+		const newHistory = await DexieHistoryStorage.getHistory();
+		setHistory(newHistory);
 
-	const refreshHistory = () => {
-		setHistory(HistoryStorage.getHistory());
+		const newStats = await DexieHistoryStorage.getStats();
+		setStats(newStats);
 	};
+
+	useEffect(() => {
+		refreshHistory();
+	}, []);
 
 	const sortHistory = (items: FileHistoryItem[]): FileHistoryItem[] => {
 		const sorted = [...items].sort((a, b) => {
@@ -87,13 +100,13 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 
 	const sortedHistory = sortHistory(history);
 
-	const handleDelete = (id: string) => {
-		HistoryStorage.removeFromHistory(id);
+	const handleDelete = async (id: string) => {
+		await DexieHistoryStorage.removeFromHistory(id);
 		refreshHistory();
 	};
 
-	const handleClearAll = () => {
-		HistoryStorage.clearHistory();
+	const handleClearAll = async () => {
+		await DexieHistoryStorage.clearHistory();
 		refreshHistory();
 		setShowClearModal(false);
 	};
@@ -122,8 +135,8 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 		onHistoryItemSelected(item);
 	};
 
-	const handleExport = () => {
-		const data = HistoryStorage.exportHistory();
+	const handleExport = async () => {
+		const data = await DexieHistoryStorage.exportHistory();
 		const blob = new Blob([data], { type: "application/json" });
 		const url = URL.createObjectURL(blob);
 
@@ -137,8 +150,8 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 		URL.revokeObjectURL(url);
 	};
 
-	const handleImport = () => {
-		const result = HistoryStorage.importHistory(importData);
+	const handleImport = async () => {
+		const result = await DexieHistoryStorage.importHistory(importData);
 		setImportResult(result);
 
 		if (result.success) {

@@ -13,7 +13,7 @@ import {
 	formatFileSize,
 	getCompressionRatio,
 } from "../utils/fileCompression";
-import { HistoryStorage } from "../utils/historyStorage";
+import { DexieHistoryStorage } from "../utils/dexieHistoryStorage";
 import type { CompressedFile } from "../utils/fileCompression";
 
 interface FileDownloadProps {
@@ -71,14 +71,14 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 		handleUrlProcess(urlInput.trim());
 	};
 
-	const handleDownload = () => {
+	const handleDownload = async () => {
 		if (!downloadReady) return;
 
 		try {
 			downloadFile(downloadReady);
 
 			// Add to history
-			HistoryStorage.addToHistory({
+			await DexieHistoryStorage.addToHistory({
 				...downloadReady,
 				url: urlInput,
 				type: "downloaded",

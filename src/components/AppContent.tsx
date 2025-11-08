@@ -29,21 +29,28 @@ import { FileDownload } from "./FileDownload";
 import { HistoryView } from "./HistoryView";
 import { ThemeToggle } from "./ThemeToggle";
 import type { CompressedFile, FileHistoryItem } from "../utils/fileCompression";
-import { HistoryStorage } from "../utils/historyStorage";
+import { DexieHistoryStorage } from "../utils/dexieHistoryStorage";
 import { compressText, fileToUrl } from "../utils/fileCompression";
 import pako from "pako";
 
 function AppContent() {
 	const [activeTab, setActiveTab] = useState("upload");
-	const [stats, setStats] = useState(HistoryStorage.getStats());
+	const [stats, setStats] = useState({
+		totalItems: 0,
+		totalSize: 0,
+		totalCompressedSize: 0,
+		uploadedCount: 0,
+		downloadedCount: 0,
+	});
 	const [codeInput, setCodeInput] = useState("");
 	const [filepath, setFilepath] = useState("");
 	const [shareableUrl, setShareableUrl] = useState("");
 	const [copied, setCopied] = useState(false);
 	const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-	const updateStats = () => {
-		setStats(HistoryStorage.getStats());
+	const updateStats = async () => {
+		const newStats = await DexieHistoryStorage.getStats();
+		setStats(newStats);
 	};
 
 	const handleFileUpload = (file: File | null) => {
@@ -103,11 +110,11 @@ function AppContent() {
 		}
 	};
 
-	const handleFileDownloaded = (compressedFile: CompressedFile) => {
+	const handleFileDownloaded = async (compressedFile: CompressedFile) => {
 		// TODO: Use compressedFile for history storage in future
 		void compressedFile;
 		setActiveTab("download"); // Stay on download tab
-		updateStats();
+		await updateStats();
 	};
 
 	const handleHistoryItemSelected = (item: FileHistoryItem) => {
@@ -143,9 +150,14 @@ function AppContent() {
 		}
 	}, []); // Only run once on mount
 
-	// Update stats on mount and when tab changes
+	// Load stats on mount
 	useEffect(() => {
-		updateStats();
+		void updateStats();
+	}, []); // Only run once on mount
+
+	// Update stats when tab changes
+	useEffect(() => {
+		void updateStats();
 	}, [activeTab]);
 
 	return (

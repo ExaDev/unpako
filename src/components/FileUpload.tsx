@@ -29,7 +29,7 @@ import {
 	getCompressionRatio,
 	validateFilepath,
 } from "../utils/fileCompression";
-import { HistoryStorage } from "../utils/historyStorage";
+import { DexieHistoryStorage } from "../utils/dexieHistoryStorage";
 import type { CompressedFile } from "../utils/fileCompression";
 
 interface FileUploadProps {
@@ -139,7 +139,7 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 			setCompressionProgress(100);
 
 			// Add to history
-			HistoryStorage.addToHistory({
+			await DexieHistoryStorage.addToHistory({
 				...compressedFile,
 				url,
 				type: "uploaded",
