@@ -35,8 +35,6 @@ interface FileTreeSidebarProps {
 		totalItems: number;
 		totalSize: number;
 		compressedSize: number;
-		totalUploaded: number;
-		totalDownloaded: number;
 	};
 }
 

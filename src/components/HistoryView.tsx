@@ -49,8 +49,6 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 		totalItems: 0,
 		totalSize: 0,
 		totalCompressedSize: 0,
-		uploadedCount: 0,
-		downloadedCount: 0,
 	});
 	const [sortBy, setSortBy] = useState<"createdAt" | "modifiedAt" | "filepath" | "size">(
 		"modifiedAt"
@@ -310,10 +308,6 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 										</Group>
 
 										<Group gap="xs" mb="xs">
-											<Badge color={item.type === "uploaded" ? "blue" : "green"} variant="light" size="xs">
-												{item.type === "uploaded" ? "Uploaded" : "Downloaded"}
-											</Badge>
-
 											<Badge color="violet" variant="light" size="xs">
 												{getCompressionRatio(item.size, item.compressedSize)}% smaller
 											</Badge>

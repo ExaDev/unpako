@@ -142,7 +142,6 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 			await DexieHistoryStorage.addToHistory({
 				...compressedFile,
 				url,
-				type: "uploaded",
 			});
 
 			setCompressionResult({ compressedFile, url });

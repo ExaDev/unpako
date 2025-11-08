@@ -81,7 +81,6 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 			await DexieHistoryStorage.addToHistory({
 				...downloadReady,
 				url: urlInput,
-				type: "downloaded",
 			});
 
 			onFileDownloaded(downloadReady);

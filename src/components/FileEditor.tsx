@@ -127,7 +127,6 @@ export function FileEditor({
 				createdAt: file?.createdAt || Date.now(),
 				modifiedAt: Date.now(),
 				url,
-				type: file?.type || "uploaded",
 			};
 
 			onUpdateHistory(historyItem);

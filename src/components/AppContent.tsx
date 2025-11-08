@@ -25,8 +25,6 @@ function AppContent() {
 		totalItems: files.length,
 		totalSize: files.reduce((sum, file) => sum + file.size, 0),
 		compressedSize: files.reduce((sum, file) => sum + file.compressedSize, 0),
-		totalUploaded: files.filter(file => file.type === "uploaded").length,
-		totalDownloaded: files.filter(file => file.type === "downloaded").length,
 	};
 
 	// Load files from storage on mount
@@ -148,12 +146,6 @@ function AppContent() {
 					<Group>
 						<Badge color="blue" variant="light" size="lg">
 							{stats.totalItems} files
-						</Badge>
-						<Badge color="green" variant="light" size="lg">
-							{stats.totalUploaded} uploaded
-						</Badge>
-						<Badge color="orange" variant="light" size="lg">
-							{stats.totalDownloaded} downloaded
 						</Badge>
 						<ThemeToggle />
 					</Group>
