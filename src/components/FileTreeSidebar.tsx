@@ -94,7 +94,7 @@ export function FileTreeSidebar({
 	const filteredTree = useMemo(() => {
 		if (!searchQuery.trim()) return treeData;
 
-		const filterTree = (node: TreeNode, query: string): boolean => {
+		const filterTree = (node: TreeNode, query: string): TreeNode | null => {
 			// Check if current node matches
 			const matches = node.name.toLowerCase().includes(query.toLowerCase());
 
@@ -102,22 +102,31 @@ export function FileTreeSidebar({
 				// Filter children and check if any match
 				const filteredChildren: Record<string, TreeNode> = {};
 				Object.entries(node.children).forEach(([key, child]) => {
-					if (filterTree({ ...child }, query)) {
-						filteredChildren[key] = child;
+					const filteredChild = filterTree(child, query);
+					if (filteredChild) {
+						filteredChildren[key] = filteredChild;
 					}
 				});
-				node.children = filteredChildren;
-				return matches || Object.keys(filteredChildren).length > 0;
+
+				// Return a new node with filtered children if there are matches
+				if (matches || Object.keys(filteredChildren).length > 0) {
+					return {
+						...node,
+						children: filteredChildren,
+					};
+				}
+				return null;
 			} else {
 				// For files, just check if name matches
-				return matches;
+				return matches ? { ...node } : null;
 			}
 		};
 
 		const result: Record<string, TreeNode> = {};
 		Object.entries(treeData).forEach(([key, node]) => {
-			if (filterTree({ ...node }, searchQuery)) {
-				result[key] = node;
+			const filteredNode = filterTree({ ...node }, searchQuery);
+			if (filteredNode) {
+				result[key] = filteredNode;
 			}
 		});
 		return result;
