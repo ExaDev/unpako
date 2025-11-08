@@ -1,18 +1,18 @@
-import { ActionIcon, Tooltip } from '@mantine/core';
-import {
-	IconSun,
-	IconMoon,
-	IconDeviceDesktop
-} from '@tabler/icons-react';
-import { useTheme } from '../hooks/useTheme';
+import { ActionIcon, Tooltip } from "@mantine/core";
+import { IconSun, IconMoon, IconDeviceDesktop } from "@tabler/icons-react";
+import { useTheme } from "../hooks/useTheme";
 
 export function ThemeToggle() {
 	const { theme, effectiveTheme, toggleTheme } = useTheme();
 
 	const getThemeIcon = () => {
-		if (theme === 'system') {
-			return effectiveTheme === 'dark' ? <IconDeviceDesktop size={18} /> : <IconDeviceDesktop size={18} />;
-		} else if (theme === 'light') {
+		if (theme === "system") {
+			return effectiveTheme === "dark" ? (
+				<IconDeviceDesktop size={18} />
+			) : (
+				<IconDeviceDesktop size={18} />
+			);
+		} else if (theme === "light") {
 			return <IconSun size={18} />;
 		} else {
 			return <IconMoon size={18} />;
@@ -20,25 +20,25 @@ export function ThemeToggle() {
 	};
 
 	const getThemeLabel = () => {
-		if (theme === 'system') {
+		if (theme === "system") {
 			return `System theme (${effectiveTheme})`;
-		} else if (theme === 'light') {
-			return 'Light mode';
+		} else if (theme === "light") {
+			return "Light mode";
 		} else {
-			return 'Dark mode';
+			return "Dark mode";
 		}
 	};
 
 	const getNextThemeLabel = () => {
 		const systemTheme = effectiveTheme;
-		const oppositeTheme = systemTheme === 'light' ? 'dark' : 'light';
+		const oppositeTheme = systemTheme === "light" ? "dark" : "light";
 
-		if (theme === 'system') {
+		if (theme === "system") {
 			return `Next: ${oppositeTheme} mode`;
 		} else if (theme === oppositeTheme) {
 			return `Next: ${systemTheme} mode (explicit)`;
 		} else {
-			return 'Next: System theme';
+			return "Next: System theme";
 		}
 	};
 
@@ -47,9 +47,7 @@ export function ThemeToggle() {
 			label={
 				<div>
 					<div>{getThemeLabel()}</div>
-					<div style={{ fontSize: '0.75rem', opacity: 0.8 }}>
-						{getNextThemeLabel()}
-					</div>
+					<div style={{ fontSize: "0.75rem", opacity: 0.8 }}>{getNextThemeLabel()}</div>
 				</div>
 			}
 			position="bottom"

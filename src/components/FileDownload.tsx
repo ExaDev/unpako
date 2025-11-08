@@ -1,31 +1,27 @@
-import { useState, useEffect, useCallback } from 'react';
-import {
-	Button,
-	Text,
-	Group,
-	Stack,
-	Alert,
-	TextInput,
-	Card,
-	Badge
-} from '@mantine/core';
+import { useState, useEffect, useCallback } from "react";
+import { Button, Text, Group, Stack, Alert, TextInput, Card, Badge } from "@mantine/core";
 import {
 	IconDownload,
 	IconLink,
 	IconLoader,
 	IconFileText,
-	IconCalendar
-} from '@tabler/icons-react';
-import { urlToFile, downloadFile, formatFileSize, getCompressionRatio } from '../utils/fileCompression';
-import { HistoryStorage } from '../utils/historyStorage';
-import type { CompressedFile } from '../utils/fileCompression';
+	IconCalendar,
+} from "@tabler/icons-react";
+import {
+	urlToFile,
+	downloadFile,
+	formatFileSize,
+	getCompressionRatio,
+} from "../utils/fileCompression";
+import { HistoryStorage } from "../utils/historyStorage";
+import type { CompressedFile } from "../utils/fileCompression";
 
 interface FileDownloadProps {
-  onFileDownloaded: (compressedFile: CompressedFile) => void;
+	onFileDownloaded: (compressedFile: CompressedFile) => void;
 }
 
 export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
-	const [urlInput, setUrlInput] = useState('');
+	const [urlInput, setUrlInput] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [downloadReady, setDownloadReady] = useState<CompressedFile | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -39,13 +35,13 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 			const compressedFile = urlToFile(url);
 
 			if (!compressedFile) {
-				setError('Invalid URL or no file data found in URL');
+				setError("Invalid URL or no file data found in URL");
 				return;
 			}
 
 			// Validate the compressed data
 			if (!compressedFile.data || !compressedFile.name) {
-				setError('Corrupted file data in URL');
+				setError("Corrupted file data in URL");
 				return;
 			}
 
@@ -53,9 +49,8 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 
 			// Update URL input if it was from page load
 			setUrlInput(url);
-
 		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Failed to process URL');
+			setError(error instanceof Error ? error.message : "Failed to process URL");
 		} finally {
 			setIsLoading(false);
 		}
@@ -64,7 +59,7 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 	// Check URL on component mount for initial load
 	useEffect(() => {
 		const currentUrl = window.location.href;
-		if (currentUrl.includes('?data=')) {
+		if (currentUrl.includes("?data=")) {
 			handleUrlProcess(currentUrl);
 		}
 	}, [handleUrlProcess]);
@@ -86,23 +81,23 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 			HistoryStorage.addToHistory({
 				...downloadReady,
 				url: urlInput,
-				type: 'downloaded'
+				type: "downloaded",
 			});
 
 			onFileDownloaded(downloadReady);
 		} catch (error) {
-			setError(error instanceof Error ? error.message : 'Download failed');
+			setError(error instanceof Error ? error.message : "Download failed");
 		}
 	};
 
 	const handleClear = () => {
-		setUrlInput('');
+		setUrlInput("");
 		setDownloadReady(null);
 		setError(null);
 
 		// Clear URL if it was set from page load
-		if (window.location.href.includes('?data=')) {
-			window.history.pushState({}, '', window.location.pathname);
+		if (window.location.href.includes("?data=")) {
+			window.history.pushState({}, "", window.location.pathname);
 		}
 	};
 
@@ -114,7 +109,7 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 						label="Paste sharing URL or enter URL manually"
 						placeholder="https://yoursite.com/?data=..."
 						value={urlInput}
-						onChange={(e) => setUrlInput(e.target.value)}
+						onChange={e => setUrlInput(e.target.value)}
 						disabled={isLoading}
 						size="md"
 					/>
@@ -126,16 +121,12 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 							disabled={!urlInput.trim() || isLoading}
 							leftSection={isLoading ? <IconLoader size={16} /> : <IconLink size={16} />}
 						>
-							{isLoading ? 'Processing URL...' : 'Process URL'}
+							{isLoading ? "Processing URL..." : "Process URL"}
 						</Button>
 
 						{urlInput && (
-							<Button
-								variant="outline"
-								onClick={handleClear}
-								disabled={isLoading}
-							>
-                Clear
+							<Button variant="outline" onClick={handleClear} disabled={isLoading}>
+								Clear
 							</Button>
 						)}
 					</Group>
@@ -151,24 +142,32 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 			{downloadReady && (
 				<Stack gap="md" mt="md">
 					<Alert color="green" title="File Ready!">
-            File successfully decompressed and ready for download.
+						File successfully decompressed and ready for download.
 					</Alert>
 
 					<Card withBorder p="md" bg="green.0">
 						<Stack gap="xs">
 							<Group>
 								<IconFileText size={16} color="#10b981" />
-								<Text fw={500} lineClamp={1}>{downloadReady.name}</Text>
+								<Text fw={500} lineClamp={1}>
+									{downloadReady.name}
+								</Text>
 								<Badge color="violet" variant="light">
 									{getCompressionRatio(downloadReady.size, downloadReady.compressedSize)}% compression
 								</Badge>
 							</Group>
 							<Group gap="lg" c="dimmed" fz="sm">
 								<Text>
-                  Original: <Text span fw={500}>{formatFileSize(downloadReady.size)}</Text>
+									Original:{" "}
+									<Text span fw={500}>
+										{formatFileSize(downloadReady.size)}
+									</Text>
 								</Text>
 								<Text>
-                  Compressed: <Text span fw={500}>{formatFileSize(downloadReady.compressedSize)}</Text>
+									Compressed:{" "}
+									<Text span fw={500}>
+										{formatFileSize(downloadReady.compressedSize)}
+									</Text>
 								</Text>
 							</Group>
 							<Group gap="sm" c="dimmed" fz="sm">
@@ -179,19 +178,12 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 					</Card>
 
 					<Group>
-						<Button
-							onClick={handleDownload}
-							leftSection={<IconDownload size={16} />}
-							color="green"
-						>
-              Download File
+						<Button onClick={handleDownload} leftSection={<IconDownload size={16} />} color="green">
+							Download File
 						</Button>
 
-						<Button
-							variant="outline"
-							onClick={handleClear}
-						>
-              Process Another URL
+						<Button variant="outline" onClick={handleClear}>
+							Process Another URL
 						</Button>
 					</Group>
 				</Stack>

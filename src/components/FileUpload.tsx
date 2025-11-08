@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef } from "react";
 import {
 	Button,
 	Text,
@@ -11,8 +11,8 @@ import {
 	TextInput,
 	ActionIcon,
 	Tooltip,
-	Badge
-} from '@mantine/core';
+	Badge,
+} from "@mantine/core";
 import {
 	IconUpload,
 	IconFile,
@@ -20,21 +20,29 @@ import {
 	IconRefresh,
 	IconCheck,
 	IconAlertCircle,
-	IconX
-} from '@tabler/icons-react';
-import { compressFile, fileToUrl, formatFileSize, getCompressionRatio } from '../utils/fileCompression';
-import { HistoryStorage } from '../utils/historyStorage';
-import type { CompressedFile } from '../utils/fileCompression';
+	IconX,
+} from "@tabler/icons-react";
+import {
+	compressFile,
+	fileToUrl,
+	formatFileSize,
+	getCompressionRatio,
+} from "../utils/fileCompression";
+import { HistoryStorage } from "../utils/historyStorage";
+import type { CompressedFile } from "../utils/fileCompression";
 
 interface FileUploadProps {
-  onFileCompressed: (compressedFile: CompressedFile, url: string) => void;
+	onFileCompressed: (compressedFile: CompressedFile, url: string) => void;
 }
 
 export function FileUpload({ onFileCompressed }: FileUploadProps) {
 	const [isDragging, setIsDragging] = useState(false);
 	const [isCompressing, setIsCompressing] = useState(false);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
-	const [compressionResult, setCompressionResult] = useState<{ compressedFile: CompressedFile; url: string } | null>(null);
+	const [compressionResult, setCompressionResult] = useState<{
+		compressedFile: CompressedFile;
+		url: string;
+	} | null>(null);
 	const [compressionError, setCompressionError] = useState<string | null>(null);
 	const [compressionProgress, setCompressionProgress] = useState(0);
 	const [copiedToClipboard, setCopiedToClipboard] = useState(false);
@@ -106,16 +114,16 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 			HistoryStorage.addToHistory({
 				...compressedFile,
 				url,
-				type: 'uploaded'
+				type: "uploaded",
 			});
 
 			setCompressionResult({ compressedFile, url });
 			onFileCompressed(compressedFile, url);
 
 			// Update browser URL
-			window.history.pushState({}, '', url);
+			window.history.pushState({}, "", url);
 		} catch (error) {
-			setCompressionError(error instanceof Error ? error.message : 'Compression failed');
+			setCompressionError(error instanceof Error ? error.message : "Compression failed");
 		} finally {
 			setIsCompressing(false);
 			setTimeout(() => setCompressionProgress(0), 1000);
@@ -129,7 +137,7 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 		setCompressionProgress(0);
 		setCopiedToClipboard(false);
 		if (fileInputRef.current) {
-			fileInputRef.current.value = '';
+			fileInputRef.current.value = "";
 		}
 	};
 
@@ -140,16 +148,16 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 				setCopiedToClipboard(true);
 				setTimeout(() => setCopiedToClipboard(false), 2000);
 			} catch (error) {
-				console.error('Failed to copy to clipboard:', error);
+				console.error("Failed to copy to clipboard:", error);
 			}
 		}
 	};
 
 	const compressionRatio = compressionResult
 		? getCompressionRatio(
-			compressionResult.compressedFile.size,
-			compressionResult.compressedFile.compressedSize
-		)
+				compressionResult.compressedFile.size,
+				compressionResult.compressedFile.compressedSize
+			)
 		: 0;
 
 	return (
@@ -160,11 +168,11 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 					withBorder
 					p="xl"
 					style={{
-						borderStyle: 'dashed',
-						borderColor: isDragging ? '#3b82f6' : undefined,
-						backgroundColor: isDragging ? '#eff6ff' : undefined,
-						cursor: 'pointer',
-						transition: 'all 0.2s ease'
+						borderStyle: "dashed",
+						borderColor: isDragging ? "#3b82f6" : undefined,
+						backgroundColor: isDragging ? "#eff6ff" : undefined,
+						cursor: "pointer",
+						transition: "all 0.2s ease",
 					}}
 					onDragEnter={handleDragEnter}
 					onDragOver={handleDragOver}
@@ -173,18 +181,18 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 					onClick={() => fileInputRef.current?.click()}
 				>
 					<Stack align="center" gap="md">
-						<IconUpload size={48} color={isDragging ? '#3b82f6' : '#6b7280'} />
+						<IconUpload size={48} color={isDragging ? "#3b82f6" : "#6b7280"} />
 						<Text size="lg" fw={500}>
-              Drop your file here or click to browse
+							Drop your file here or click to browse
 						</Text>
 						<Text size="sm" c="dimmed">
-              Any file type is supported • No size limitations
+							Any file type is supported • No size limitations
 						</Text>
 						<input
 							ref={fileInputRef}
 							type="file"
 							onChange={handleFileInputChange}
-							style={{ display: 'none' }}
+							style={{ display: "none" }}
 						/>
 					</Stack>
 				</Paper>
@@ -197,7 +205,9 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 						<Group>
 							<IconFile size={24} color="#3b82f6" />
 							<div style={{ flex: 1 }}>
-								<Text fw={500} lineClamp={1}>{selectedFile.name}</Text>
+								<Text fw={500} lineClamp={1}>
+									{selectedFile.name}
+								</Text>
 								<Text size="sm" c="dimmed">
 									{formatFileSize(selectedFile.size)}
 								</Text>
@@ -206,11 +216,7 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 					</Card>
 
 					{compressionError && (
-						<Alert
-							color="red"
-							icon={<IconAlertCircle size={16} />}
-							title="Compression Error"
-						>
+						<Alert color="red" icon={<IconAlertCircle size={16} />} title="Compression Error">
 							{compressionError}
 						</Alert>
 					)}
@@ -234,7 +240,7 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 							disabled={isCompressing}
 							leftSection={<IconUpload size={16} />}
 						>
-							{isCompressing ? 'Compressing...' : 'Compress & Get URL'}
+							{isCompressing ? "Compressing..." : "Compress & Get URL"}
 						</Button>
 						<Button
 							variant="outline"
@@ -242,7 +248,7 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 							disabled={isCompressing}
 							leftSection={<IconX size={16} />}
 						>
-              Cancel
+							Cancel
 						</Button>
 					</Group>
 				</Stack>
@@ -269,10 +275,16 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 							</Group>
 							<Group gap="lg" c="dimmed">
 								<Text>
-                  Original: <Text span fw={500}>{formatFileSize(compressionResult.compressedFile.size)}</Text>
+									Original:{" "}
+									<Text span fw={500}>
+										{formatFileSize(compressionResult.compressedFile.size)}
+									</Text>
 								</Text>
 								<Text>
-                  Compressed: <Text span fw={500}>{formatFileSize(compressionResult.compressedFile.compressedSize)}</Text>
+									Compressed:{" "}
+									<Text span fw={500}>
+										{formatFileSize(compressionResult.compressedFile.compressedSize)}
+									</Text>
 								</Text>
 							</Group>
 						</Stack>
@@ -296,20 +308,16 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 							readOnly
 							styles={{
 								input: {
-									fontFamily: 'monospace',
-									fontSize: '0.875rem'
-								}
+									fontFamily: "monospace",
+									fontSize: "0.875rem",
+								},
 							}}
 						/>
 					</Stack>
 
 					<Group>
-						<Button
-							variant="outline"
-							onClick={handleReset}
-							leftSection={<IconRefresh size={16} />}
-						>
-              Compress Another File
+						<Button variant="outline" onClick={handleReset} leftSection={<IconRefresh size={16} />}>
+							Compress Another File
 						</Button>
 					</Group>
 				</Stack>

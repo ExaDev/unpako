@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
 	Text,
 	Group,
@@ -13,8 +13,8 @@ import {
 	TextInput,
 	ScrollArea,
 	Tooltip,
-	Box
-} from '@mantine/core';
+	Box,
+} from "@mantine/core";
 import {
 	IconHistory,
 	IconDownload,
@@ -24,22 +24,31 @@ import {
 	IconFileImport,
 	IconCalendar,
 	IconFileText,
-	IconShare
-} from '@tabler/icons-react';
-import { HistoryStorage } from '../utils/historyStorage';
-import { fileToUrl, downloadFile, formatFileSize, getCompressionRatio } from '../utils/fileCompression';
-import type { FileHistoryItem } from '../utils/fileCompression';
+	IconShare,
+} from "@tabler/icons-react";
+import { HistoryStorage } from "../utils/historyStorage";
+import {
+	fileToUrl,
+	downloadFile,
+	formatFileSize,
+	getCompressionRatio,
+} from "../utils/fileCompression";
+import type { FileHistoryItem } from "../utils/fileCompression";
 
 interface HistoryViewProps {
-  onHistoryItemSelected: (item: FileHistoryItem) => void;
+	onHistoryItemSelected: (item: FileHistoryItem) => void;
 }
 
 export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 	const [history, setHistory] = useState<FileHistoryItem[]>(() => HistoryStorage.getHistory());
 	const [showClearModal, setShowClearModal] = useState(false);
 	const [showImportModal, setShowImportModal] = useState(false);
-	const [importData, setImportData] = useState('');
-	const [importResult, setImportResult] = useState<{ success: boolean; imported: number; errors: string[] } | null>(null);
+	const [importData, setImportData] = useState("");
+	const [importResult, setImportResult] = useState<{
+		success: boolean;
+		imported: number;
+		errors: string[];
+	} | null>(null);
 
 	const stats = HistoryStorage.getStats();
 
@@ -63,7 +72,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 			downloadFile(item);
 			onHistoryItemSelected(item);
 		} catch (error) {
-			console.error('Download failed:', error);
+			console.error("Download failed:", error);
 		}
 	};
 
@@ -72,24 +81,24 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 		try {
 			await navigator.clipboard.writeText(url);
 		} catch (error) {
-			console.error('Failed to copy URL:', error);
+			console.error("Failed to copy URL:", error);
 		}
 	};
 
 	const handleOpenUrl = (item: FileHistoryItem) => {
 		const url = item.url || fileToUrl(item);
-		window.history.pushState({}, '', url);
+		window.history.pushState({}, "", url);
 		onHistoryItemSelected(item);
 	};
 
 	const handleExport = () => {
 		const data = HistoryStorage.exportHistory();
-		const blob = new Blob([data], { type: 'application/json' });
+		const blob = new Blob([data], { type: "application/json" });
 		const url = URL.createObjectURL(blob);
 
-		const a = document.createElement('a');
+		const a = document.createElement("a");
 		a.href = url;
-		a.download = 'unpako-history.json';
+		a.download = "unpako-history.json";
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
@@ -104,7 +113,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 		if (result.success) {
 			refreshHistory();
 			setShowImportModal(false);
-			setImportData('');
+			setImportData("");
 		}
 	};
 
@@ -117,7 +126,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 				<Text size="lg" fw={600} mb="md">
 					<Group>
 						<IconHistory size={20} />
-            Statistics
+						Statistics
 					</Group>
 				</Text>
 
@@ -128,7 +137,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 								{stats.totalItems}
 							</Text>
 							<Text size="sm" c="dimmed">
-                Total Files
+								Total Files
 							</Text>
 						</Card>
 					</Grid.Col>
@@ -139,7 +148,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 								{formatFileSize(stats.totalSize)}
 							</Text>
 							<Text size="sm" c="dimmed">
-                Original Size
+								Original Size
 							</Text>
 						</Card>
 					</Grid.Col>
@@ -150,7 +159,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 								{formatFileSize(stats.totalCompressedSize)}
 							</Text>
 							<Text size="sm" c="dimmed">
-                Compressed Size
+								Compressed Size
 							</Text>
 						</Card>
 					</Grid.Col>
@@ -161,7 +170,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 								{compressionRatio}%
 							</Text>
 							<Text size="sm" c="dimmed">
-                Compression
+								Compression
 							</Text>
 						</Card>
 					</Grid.Col>
@@ -176,7 +185,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 					onClick={handleExport}
 					disabled={history.length === 0}
 				>
-          Export History
+					Export History
 				</Button>
 
 				<Button
@@ -184,7 +193,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 					leftSection={<IconFileImport size={16} />}
 					onClick={() => setShowImportModal(true)}
 				>
-          Import History
+					Import History
 				</Button>
 
 				<Button
@@ -194,7 +203,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 					onClick={() => setShowClearModal(true)}
 					disabled={history.length === 0}
 				>
-          Clear All
+					Clear All
 				</Button>
 			</Group>
 
@@ -202,16 +211,16 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 			{history.length === 0 ? (
 				<Card shadow="sm" withBorder p="xl">
 					<Text ta="center" c="dimmed" size="lg">
-            No files in history yet
+						No files in history yet
 					</Text>
 					<Text ta="center" c="dimmed" size="sm" mt="xs">
-            Upload or download files to see them here
+						Upload or download files to see them here
 					</Text>
 				</Card>
 			) : (
 				<ScrollArea h={400}>
 					<Stack gap="sm">
-						{history.map((item) => (
+						{history.map(item => (
 							<Card key={item.id} shadow="sm" withBorder p="md">
 								<Group justify="space-between" align="flex-start">
 									<div style={{ flex: 1 }}>
@@ -223,12 +232,8 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 										</Group>
 
 										<Group gap="xs" mb="xs">
-											<Badge
-												color={item.type === 'uploaded' ? 'blue' : 'green'}
-												variant="light"
-												size="xs"
-											>
-												{item.type === 'uploaded' ? 'Uploaded' : 'Downloaded'}
+											<Badge color={item.type === "uploaded" ? "blue" : "green"} variant="light" size="xs">
+												{item.type === "uploaded" ? "Uploaded" : "Downloaded"}
 											</Badge>
 
 											<Badge color="violet" variant="light" size="xs">
@@ -249,41 +254,25 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 
 									<Group gap="xs">
 										<Tooltip label="Open in browser">
-											<ActionIcon
-												variant="subtle"
-												color="blue"
-												onClick={() => handleOpenUrl(item)}
-											>
+											<ActionIcon variant="subtle" color="blue" onClick={() => handleOpenUrl(item)}>
 												<IconShare size={16} />
 											</ActionIcon>
 										</Tooltip>
 
 										<Tooltip label="Copy URL">
-											<ActionIcon
-												variant="subtle"
-												color="gray"
-												onClick={() => handleCopyUrl(item)}
-											>
+											<ActionIcon variant="subtle" color="gray" onClick={() => handleCopyUrl(item)}>
 												<IconCopy size={16} />
 											</ActionIcon>
 										</Tooltip>
 
 										<Tooltip label="Download file">
-											<ActionIcon
-												variant="subtle"
-												color="green"
-												onClick={() => handleDownload(item)}
-											>
+											<ActionIcon variant="subtle" color="green" onClick={() => handleDownload(item)}>
 												<IconDownload size={16} />
 											</ActionIcon>
 										</Tooltip>
 
 										<Tooltip label="Delete">
-											<ActionIcon
-												variant="subtle"
-												color="red"
-												onClick={() => handleDelete(item.id)}
-											>
+											<ActionIcon variant="subtle" color="red" onClick={() => handleDelete(item.id)}>
 												<IconTrash size={16} />
 											</ActionIcon>
 										</Tooltip>
@@ -302,22 +291,14 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 				title="Clear All History"
 				centered
 			>
-				<Text mb="lg">
-          Are you sure you want to clear all history? This action cannot be undone.
-				</Text>
+				<Text mb="lg">Are you sure you want to clear all history? This action cannot be undone.</Text>
 
 				<Group justify="flex-end">
-					<Button
-						variant="outline"
-						onClick={() => setShowClearModal(false)}
-					>
-            Cancel
+					<Button variant="outline" onClick={() => setShowClearModal(false)}>
+						Cancel
 					</Button>
-					<Button
-						color="red"
-						onClick={handleClearAll}
-					>
-            Clear All
+					<Button color="red" onClick={handleClearAll}>
+						Clear All
 					</Button>
 				</Group>
 			</Modal>
@@ -327,7 +308,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 				opened={showImportModal}
 				onClose={() => {
 					setShowImportModal(false);
-					setImportData('');
+					setImportData("");
 					setImportResult(null);
 				}}
 				title="Import History"
@@ -338,39 +319,33 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 						label="Paste your exported history data (JSON)"
 						placeholder="Paste JSON data here..."
 						value={importData}
-						onChange={(e) => setImportData(e.target.value)}
-						error={importResult?.errors?.join(', ')}
+						onChange={e => setImportData(e.target.value)}
+						error={importResult?.errors?.join(", ")}
 						styles={{
 							input: {
-								fontFamily: 'monospace',
-								minHeight: '120px'
-							}
+								fontFamily: "monospace",
+								minHeight: "120px",
+							},
 						}}
 					/>
 
 					{importResult && (
 						<Alert
-							color={importResult.success ? 'green' : 'red'}
-							title={importResult.success ? 'Success' : 'Import Failed'}
+							color={importResult.success ? "green" : "red"}
+							title={importResult.success ? "Success" : "Import Failed"}
 						>
 							{importResult.success
 								? `Successfully imported ${importResult.imported} items.`
-								: `Failed to import. ${importResult.errors.join(' ')}`}
+								: `Failed to import. ${importResult.errors.join(" ")}`}
 						</Alert>
 					)}
 
 					<Group justify="flex-end">
-						<Button
-							variant="outline"
-							onClick={() => setShowImportModal(false)}
-						>
-              Cancel
+						<Button variant="outline" onClick={() => setShowImportModal(false)}>
+							Cancel
 						</Button>
-						<Button
-							onClick={handleImport}
-							disabled={!importData.trim()}
-						>
-              Import
+						<Button onClick={handleImport} disabled={!importData.trim()}>
+							Import
 						</Button>
 					</Group>
 				</Stack>

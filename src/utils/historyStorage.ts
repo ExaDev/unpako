@@ -1,6 +1,6 @@
-import type { FileHistoryItem } from './fileCompression';
+import type { FileHistoryItem } from "./fileCompression";
 
-const STORAGE_KEY = 'unpako-history';
+const STORAGE_KEY = "unpako-history";
 const MAX_HISTORY_ITEMS = 50;
 
 export class HistoryStorage {
@@ -10,13 +10,13 @@ export class HistoryStorage {
 			const stored = localStorage.getItem(STORAGE_KEY);
 			return stored ? JSON.parse(stored) : [];
 		} catch (error) {
-			console.error('Failed to load history:', error);
+			console.error("Failed to load history:", error);
 			return [];
 		}
 	}
 
 	// Add new item to history
-	static addToHistory(item: Omit<FileHistoryItem, 'id'>): void {
+	static addToHistory(item: Omit<FileHistoryItem, "id">): void {
 		try {
 			const history = this.getHistory();
 			const newItem: FileHistoryItem = {
@@ -34,7 +34,7 @@ export class HistoryStorage {
 
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
 		} catch (error) {
-			console.error('Failed to save to history:', error);
+			console.error("Failed to save to history:", error);
 		}
 	}
 
@@ -45,7 +45,7 @@ export class HistoryStorage {
 			const filtered = history.filter(item => item.id !== id);
 			localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
 		} catch (error) {
-			console.error('Failed to remove from history:', error);
+			console.error("Failed to remove from history:", error);
 		}
 	}
 
@@ -54,7 +54,7 @@ export class HistoryStorage {
 		try {
 			localStorage.removeItem(STORAGE_KEY);
 		} catch (error) {
-			console.error('Failed to clear history:', error);
+			console.error("Failed to clear history:", error);
 		}
 	}
 
@@ -75,26 +75,26 @@ export class HistoryStorage {
 				localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
 			}
 		} catch (error) {
-			console.error('Failed to update history item:', error);
+			console.error("Failed to update history item:", error);
 		}
 	}
 
 	// Get statistics
 	static getStats(): {
-    totalItems: number;
-    totalSize: number;
-    totalCompressedSize: number;
-    uploadedCount: number;
-    downloadedCount: number;
-    } {
+		totalItems: number;
+		totalSize: number;
+		totalCompressedSize: number;
+		uploadedCount: number;
+		downloadedCount: number;
+	} {
 		const history = this.getHistory();
 
 		return {
 			totalItems: history.length,
 			totalSize: history.reduce((sum, item) => sum + item.size, 0),
 			totalCompressedSize: history.reduce((sum, item) => sum + item.compressedSize, 0),
-			uploadedCount: history.filter(item => item.type === 'uploaded').length,
-			downloadedCount: history.filter(item => item.type === 'downloaded').length,
+			uploadedCount: history.filter(item => item.type === "uploaded").length,
+			downloadedCount: history.filter(item => item.type === "downloaded").length,
 		};
 	}
 
@@ -118,7 +118,7 @@ export class HistoryStorage {
 			const data = JSON.parse(jsonData);
 
 			if (!Array.isArray(data)) {
-				errors.push('Invalid format: Expected array');
+				errors.push("Invalid format: Expected array");
 				return { success: false, imported: 0, errors };
 			}
 
@@ -133,7 +133,7 @@ export class HistoryStorage {
 						continue;
 					}
 
-					if (item.type !== 'uploaded' && item.type !== 'downloaded') {
+					if (item.type !== "uploaded" && item.type !== "downloaded") {
 						errors.push(`Invalid item: Invalid type "${item.type}"`);
 						continue;
 					}
@@ -165,7 +165,7 @@ export class HistoryStorage {
 		return {
 			success: imported > 0 && errors.length === 0,
 			imported,
-			errors
+			errors,
 		};
 	}
 }

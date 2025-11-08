@@ -1,46 +1,46 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Theme Switching Functionality', () => {
+test.describe("Theme Switching Functionality", () => {
 	test.beforeEach(async ({ page }) => {
 		// Navigate to the app with longer timeout
-		await page.goto('http://localhost:5174', { timeout: 10000 });
+		await page.goto("http://localhost:5174", { timeout: 10000 });
 
 		// Wait for the app to load with more robust selectors
-		await page.waitForSelector('body', { timeout: 10000 });
+		await page.waitForSelector("body", { timeout: 10000 });
 		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 10000 });
-		await page.waitForLoadState('domcontentloaded');
+		await page.waitForLoadState("domcontentloaded");
 	});
 
-	test('should display theme toggle button in header', async ({ page }) => {
+	test("should display theme toggle button in header", async ({ page }) => {
 		// Find the theme toggle button
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
 		// Verify the button is visible and has correct initial state
 		await expect(themeButton).toBeVisible();
-		const ariaLabel = await themeButton.getAttribute('aria-label');
+		const ariaLabel = await themeButton.getAttribute("aria-label");
 		expect(ariaLabel).toMatch(/Theme: (System theme|Light mode|Dark mode)/);
 	});
 
-	test('should cycle through three theme states', async ({ page }) => {
+	test("should cycle through three theme states", async ({ page }) => {
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
 		// Get initial theme state
-		const initialState = await themeButton.getAttribute('aria-label');
+		const initialState = await themeButton.getAttribute("aria-label");
 		expect(initialState).toBeTruthy();
 
 		// Click once - should go to opposite of system theme
 		await themeButton.click();
-		const afterFirstClick = await themeButton.getAttribute('aria-label');
+		const afterFirstClick = await themeButton.getAttribute("aria-label");
 		expect(afterFirstClick).not.toBe(initialState);
 
 		// Click again - should go to explicit system theme
 		await themeButton.click();
-		const afterSecondClick = await themeButton.getAttribute('aria-label');
+		const afterSecondClick = await themeButton.getAttribute("aria-label");
 		expect(afterSecondClick).not.toBe(afterFirstClick);
 
 		// Click third time - should return to system
 		await themeButton.click();
-		const afterThirdClick = await themeButton.getAttribute('aria-label');
+		const afterThirdClick = await themeButton.getAttribute("aria-label");
 		expect(afterThirdClick).not.toBe(afterSecondClick);
 
 		// Verify we have three distinct states
@@ -49,78 +49,76 @@ test.describe('Theme Switching Functionality', () => {
 		expect(uniqueStates.size).toBe(3);
 	});
 
-	test('should persist theme choice in localStorage', async ({ page }) => {
+	test("should persist theme choice in localStorage", async ({ page }) => {
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
 		// Get initial localStorage value
-		const initialStorage = await page.evaluate(() => localStorage.getItem('unpako-theme'));
+		const initialStorage = await page.evaluate(() => localStorage.getItem("unpako-theme"));
 
 		// Click to change theme
 		await themeButton.click();
 
 		// Verify localStorage was updated
-		const afterClickStorage = await page.evaluate(() => localStorage.getItem('unpako-theme'));
+		const afterClickStorage = await page.evaluate(() => localStorage.getItem("unpako-theme"));
 		expect(afterClickStorage).not.toBe(initialStorage);
-		expect(['system', 'light', 'dark']).toContain(afterClickStorage);
+		expect(["system", "light", "dark"]).toContain(afterClickStorage);
 	});
 
-	test('should show correct tooltip with next theme state', async ({ page }) => {
+	test("should show correct tooltip with next theme state", async ({ page }) => {
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
 		// Hover over the theme button to show tooltip
 		await themeButton.hover();
 
 		// Look for tooltip content using broader Mantine tooltip selectors
-		const tooltip = page.locator('[data-floating]').or(
-			page.locator('[role="tooltip"]')
-		).or(
-			page.locator('[id*="tooltip"]')
-		).or(
-			page.locator('.mantine-Tooltip-tooltip')
-		);
+		const tooltip = page
+			.locator("[data-floating]")
+			.or(page.locator('[role="tooltip"]'))
+			.or(page.locator('[id*="tooltip"]'))
+			.or(page.locator(".mantine-Tooltip-tooltip"));
 
 		// Wait for tooltip to appear with shorter timeout
 		await expect(tooltip.first()).toBeVisible({ timeout: 500 });
 
 		// Get tooltip text content
 		const tooltipText = await tooltip.first().textContent();
-		expect(tooltipText).toContain('Next:');
+		expect(tooltipText).toContain("Next:");
 	});
 
-	test('should maintain theme across page refreshes', async ({ page }) => {
+	test("should maintain theme across page refreshes", async ({ page }) => {
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
 		// Change theme to light mode
-		let currentLabel = await themeButton.getAttribute('aria-label');
-		while (!currentLabel?.includes('Light mode')) {
+		let currentLabel = await themeButton.getAttribute("aria-label");
+		while (!currentLabel?.includes("Light mode")) {
 			await themeButton.click();
-			currentLabel = await themeButton.getAttribute('aria-label');
+			currentLabel = await themeButton.getAttribute("aria-label");
 			// Prevent infinite loop
-			if (await themeButton.count() === 0) break;
+			if ((await themeButton.count()) === 0) break;
 		}
 
 		// Verify current state is Light mode
-		expect(currentLabel).toContain('Light mode');
+		expect(currentLabel).toContain("Light mode");
 
 		// Refresh the page
 		await page.reload();
-		await page.waitForLoadState('networkidle');
+		await page.waitForLoadState("networkidle");
 
 		// Re-find the theme button after refresh
 		const refreshedThemeButton = page.locator('[aria-label*="Theme"]');
 		await expect(refreshedThemeButton).toBeVisible();
 
 		// Verify theme persisted
-		const refreshedLabel = await refreshedThemeButton.getAttribute('aria-label');
-		expect(refreshedLabel).toContain('Light mode');
+		const refreshedLabel = await refreshedThemeButton.getAttribute("aria-label");
+		expect(refreshedLabel).toContain("Light mode");
 	});
 
-	test('should apply theme styles to the page', async ({ page }) => {
+	test("should apply theme styles to the page", async ({ page }) => {
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
 		// Get initial theme from data attribute
 		const initialTheme = await page.evaluate(() => {
-			return document.documentElement.dataset.mantineColorScheme || 'light';
+			return document.documentElement.dataset.mantineColorScheme || "light";
 		});
 
 		// Click to toggle to opposite theme
@@ -129,20 +127,20 @@ test.describe('Theme Switching Functionality', () => {
 
 		// Check if theme changed
 		const newTheme = await page.evaluate(() => {
-			return document.documentElement.dataset.mantineColorScheme || 'light';
+			return document.documentElement.dataset.mantineColorScheme || "light";
 		});
 
 		// Theme should have changed (unless initial state was the target)
-		const finalLabel = await themeButton.getAttribute('aria-label');
+		const finalLabel = await themeButton.getAttribute("aria-label");
 
-		if (finalLabel?.includes('Dark mode')) {
-			expect(newTheme).toBe('dark');
-		} else if (finalLabel?.includes('Light mode')) {
-			expect(newTheme).toBe('light');
+		if (finalLabel?.includes("Dark mode")) {
+			expect(newTheme).toBe("dark");
+		} else if (finalLabel?.includes("Light mode")) {
+			expect(newTheme).toBe("light");
 		}
 	});
 
-	test('should handle rapid clicking correctly', async ({ page }) => {
+	test("should handle rapid clicking correctly", async ({ page }) => {
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
 		// Rapid clicking 5 times
@@ -152,7 +150,7 @@ test.describe('Theme Switching Functionality', () => {
 		}
 
 		// Should still be in a valid state
-		const finalLabel = await themeButton.getAttribute('aria-label');
+		const finalLabel = await themeButton.getAttribute("aria-label");
 		expect(finalLabel).toMatch(/Theme: (System theme|Light mode|Dark mode)/);
 
 		// Should not cause any JavaScript errors
@@ -160,7 +158,7 @@ test.describe('Theme Switching Functionality', () => {
 			const errors = [];
 			const originalError = console.error;
 			console.error = (...args) => errors.push(args);
-       
+
 			console.error = originalError;
 			return errors.length;
 		});
@@ -168,50 +166,50 @@ test.describe('Theme Switching Functionality', () => {
 		expect(consoleErrors).toBe(0);
 	});
 
-	test('should show appropriate icon for each theme state', async ({ page }) => {
+	test("should show appropriate icon for each theme state", async ({ page }) => {
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
 		// Check that the button contains an icon (SVG element)
-		const hasIcon = await themeButton.locator('svg').isVisible();
+		const hasIcon = await themeButton.locator("svg").isVisible();
 		expect(hasIcon).toBe(true);
 
 		// Cycle through themes and check icons exist
 		for (let i = 0; i < 3; i++) {
 			await themeButton.click();
-			const iconStillExists = await themeButton.locator('svg').isVisible();
+			const iconStillExists = await themeButton.locator("svg").isVisible();
 			expect(iconStillExists).toBe(true);
 
-			const currentLabel = await themeButton.getAttribute('aria-label');
+			const currentLabel = await themeButton.getAttribute("aria-label");
 			expect(currentLabel).toMatch(/Theme: (System theme|Light mode|Dark mode)/);
 		}
 	});
 
-	test('should work when system theme preference changes', async ({ page }) => {
+	test("should work when system theme preference changes", async ({ page }) => {
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
 		// Set to system theme mode first
-		let currentLabel = await themeButton.getAttribute('aria-label');
-		while (!currentLabel?.includes('System')) {
+		let currentLabel = await themeButton.getAttribute("aria-label");
+		while (!currentLabel?.includes("System")) {
 			await themeButton.click();
-			currentLabel = await themeButton.getAttribute('aria-label');
+			currentLabel = await themeButton.getAttribute("aria-label");
 		}
 
 		// Mock system theme preference change
 		await page.addStyleTag({
-			content: 'html { color-scheme: light !important; }',
+			content: "html { color-scheme: light !important; }",
 		});
 
 		// Simulate media query change by using addInitScript to override matchMedia
 		await page.addInitScript(() => {
 			// Override matchMedia to simulate system theme change
 			const originalMatchMedia = window.matchMedia;
-			window.matchMedia = (query) => {
-				if (query === '(prefers-color-scheme: dark)') {
+			window.matchMedia = query => {
+				if (query === "(prefers-color-scheme: dark)") {
 					return {
 						matches: false, // Force light mode
 						media: query,
 						addEventListener: () => {},
-						removeEventListener: () => {}
+						removeEventListener: () => {},
 					};
 				}
 				return originalMatchMedia(query);
@@ -221,7 +219,7 @@ test.describe('Theme Switching Functionality', () => {
 		await page.waitForTimeout(100);
 
 		// Verify it's still in system mode
-		const stillSystemLabel = await themeButton.getAttribute('aria-label');
-		expect(stillSystemLabel).toContain('System');
+		const stillSystemLabel = await themeButton.getAttribute("aria-label");
+		expect(stillSystemLabel).toContain("System");
 	});
 });
