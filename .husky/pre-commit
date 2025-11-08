@@ -1,0 +1,59 @@
+
+echo "Running pre-commit checks..."
+
+echo "1. Running TypeScript type checking..."
+pnpm run typecheck
+if [ $? -ne 0 ]; then
+  echo "ERROR: TypeScript type checking failed"
+  exit 1
+fi
+echo "SUCCESS: TypeScript type checking passed"
+
+echo "2. Running ESLint..."
+pnpm run lint
+if [ $? -ne 0 ]; then
+  echo "ERROR: ESLint failed"
+  exit 1
+fi
+echo "SUCCESS: ESLint passed"
+
+echo "3. Running unit tests..."
+# Create simple test if none exist
+if ! find src -name "*.unit.test.*" -type f 2>/dev/null | grep -q .; then
+  echo "INFO: No unit tests found, skipping..."
+else
+  pnpm run test:unit
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Unit tests failed"
+    exit 1
+  fi
+  echo "SUCCESS: Unit tests passed"
+fi
+
+echo "4. Running integration tests..."
+# Create simple test if none exist
+if ! find src -name "*.integration.test.*" -type f 2>/dev/null | grep -q .; then
+  echo "INFO: No integration tests found, skipping..."
+else
+  pnpm run test:integration
+  if [ $? -ne 0 ]; then
+    echo "ERROR: Integration tests failed"
+    exit 1
+  fi
+  echo "SUCCESS: Integration tests passed"
+fi
+
+echo "5. Running e2e tests..."
+# Create simple test if none exist
+if ! find src -name "*.e2e.test.*" -type f 2>/dev/null | grep -q .; then
+  echo "INFO: No e2e tests found, skipping..."
+else
+  pnpm run test:e2e
+  if [ $? -ne 0 ]; then
+    echo "ERROR: E2E tests failed"
+    exit 1
+  fi
+  echo "SUCCESS: E2E tests passed"
+fi
+
+echo "All pre-commit checks passed!"
