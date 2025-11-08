@@ -1,3 +1,13 @@
+## [1.1.2](https://github.com/ExaDev/unpako/compare/v1.1.1...v1.1.2) (2025-11-08)
+
+
+### Bug Fixes
+
+* reduce coverage artifact retention to 14 days ([489c46e](https://github.com/ExaDev/unpako/commit/489c46e5253a102e44b670624b6a961c8f5523a0))
+* resolve CI warnings and improve code quality ([c13a1a5](https://github.com/ExaDev/unpako/commit/c13a1a5e5c226e56fed50b44e7b7d7d48c8167f1))
+* **storage:** remove obsolete type validation from import methods ([4a25d52](https://github.com/ExaDev/unpako/commit/4a25d52df5e84bdb14dc2fdb250d3957c2d3928d))
+* **ui:** prevent filetree data corruption during search operations ([db23804](https://github.com/ExaDev/unpako/commit/db238049a44e64532d8868c26e7366f700257857))
+
 ## [1.1.1](https://github.com/ExaDev/unpako/compare/v1.1.0...v1.1.1) (2025-11-08)
 
 # [1.1.0](https://github.com/ExaDev/unpako/compare/v1.0.1...v1.1.0) (2025-11-08)
