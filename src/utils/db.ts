@@ -20,6 +20,22 @@ export class UnpakoDB extends Dexie {
 		this.version(2).stores({
 			fileHistory: "++id, filepath, size, compressedSize, createdAt, modifiedAt, type, url",
 		});
+
+		// Version 3: Remove type field (simplified schema)
+		this.version(3)
+			.stores({
+				fileHistory: "++id, filepath, size, compressedSize, createdAt, modifiedAt, url",
+			})
+			.upgrade(tx => {
+				// Migration: Remove type field from existing records
+				return tx
+					.table("fileHistory")
+					.toCollection()
+					.modify(file => {
+						// Remove the type property from existing records
+						delete (file as FileHistoryItem & { type?: string }).type;
+					});
+			});
 	}
 }
 

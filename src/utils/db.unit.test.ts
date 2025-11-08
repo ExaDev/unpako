@@ -18,7 +18,7 @@ describe("Database Setup", () => {
 		});
 
 		it("should have correct schema version", () => {
-			expect(db.verno).toBe(2);
+			expect(db.verno).toBe(3);
 		});
 	});
 
@@ -72,7 +72,6 @@ describe("Database Setup", () => {
 				compressedSize: 5,
 				createdAt: now,
 				modifiedAt: now,
-				type: "uploaded" as const,
 			};
 
 			await db.fileHistory.add(testItem);
@@ -92,7 +91,6 @@ describe("Database Setup", () => {
 					compressedSize: 3,
 					createdAt: now,
 					modifiedAt: now,
-					type: "uploaded" as const,
 				},
 				{
 					id: "test-id-2",
@@ -102,7 +100,6 @@ describe("Database Setup", () => {
 					compressedSize: 3,
 					createdAt: now + 1,
 					modifiedAt: now + 1,
-					type: "downloaded" as const,
 				},
 			];
 
@@ -122,7 +119,6 @@ describe("Database Setup", () => {
 				compressedSize: 3,
 				createdAt: now,
 				modifiedAt: now,
-				type: "uploaded" as const,
 			};
 
 			await db.fileHistory.add(testItem);
@@ -143,7 +139,6 @@ describe("Database Setup", () => {
 					compressedSize: 3,
 					createdAt: now,
 					modifiedAt: now,
-					type: "uploaded" as const,
 				},
 				{
 					id: "clear-test-2",
@@ -153,7 +148,6 @@ describe("Database Setup", () => {
 					compressedSize: 3,
 					createdAt: now + 1,
 					modifiedAt: now + 1,
-					type: "uploaded" as const,
 				},
 			];
 
@@ -174,7 +168,6 @@ describe("Database Setup", () => {
 				compressedSize: 4,
 				createdAt: now,
 				modifiedAt: now,
-				type: "uploaded" as const,
 			};
 
 			await db.fileHistory.add(testItem);
@@ -209,7 +202,6 @@ describe("Database Setup", () => {
 					compressedSize: 4,
 					createdAt: timestamp1,
 					modifiedAt: timestamp1,
-					type: "uploaded" as const,
 				},
 				{
 					id: "order-2",
@@ -219,7 +211,6 @@ describe("Database Setup", () => {
 					compressedSize: 4,
 					createdAt: timestamp2,
 					modifiedAt: timestamp2,
-					type: "uploaded" as const,
 				},
 				{
 					id: "order-3",
@@ -229,7 +220,6 @@ describe("Database Setup", () => {
 					compressedSize: 4,
 					createdAt: timestamp3,
 					modifiedAt: timestamp3,
-					type: "uploaded" as const,
 				},
 			];
 
@@ -274,7 +264,6 @@ describe("Database Setup", () => {
 				compressedSize: 5,
 				createdAt: oldTimestamp, // This would be set during migration from old timestamp
 				modifiedAt: oldTimestamp, // This would be set during migration from old timestamp
-				type: "uploaded",
 			});
 
 			// Retrieve the item
