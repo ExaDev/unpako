@@ -3,6 +3,8 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
+import prettier from 'eslint-plugin-prettier'
+import prettierConfig from 'eslint-config-prettier'
 import { defineConfig, globalIgnores } from 'eslint/config'
 import noEmojisRule from './eslint-rules/emoji-rule.js'
 
@@ -15,14 +17,18 @@ export default defineConfig([
       tseslint.configs.recommended,
       reactHooks.configs['recommended-latest'],
       reactRefresh.configs.vite,
+      prettierConfig,
     ],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    plugins: {
+      prettier,
+    },
     rules: {
-      // Use tab indentation
-      'indent': ['error', 'tab'],
+      // Enable Prettier formatting as an ESLint rule (handles indentation)
+      'prettier/prettier': 'error',
 
       // Disallow unused variables
       '@typescript-eslint/no-unused-vars': 'error',
