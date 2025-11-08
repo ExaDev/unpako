@@ -12,7 +12,6 @@ export interface CompressedFile {
 export interface FileHistoryItem extends CompressedFile {
 	id: string;
 	url?: string;
-	type: "uploaded" | "downloaded";
 }
 
 // Compress file data and encode to base64
