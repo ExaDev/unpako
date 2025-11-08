@@ -4,7 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
-import noEmojisRule from './emoji-rule.js'
+import noEmojisRule from './eslint-rules/emoji-rule.js'
 
 export default defineConfig([
   globalIgnores(['dist']),
