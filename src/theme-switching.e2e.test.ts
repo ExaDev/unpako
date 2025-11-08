@@ -116,11 +116,6 @@ test.describe("Theme Switching Functionality", () => {
 	test("should apply theme styles to the page", async ({ page }) => {
 		const themeButton = page.locator('[aria-label*="Theme"]');
 
-		// Get initial theme from data attribute
-		const initialTheme = await page.evaluate(() => {
-			return document.documentElement.dataset.mantineColorScheme || "light";
-		});
-
 		// Click to toggle to opposite theme
 		await themeButton.click();
 		await page.waitForTimeout(500); // Allow theme to apply
@@ -210,6 +205,10 @@ test.describe("Theme Switching Functionality", () => {
 						media: query,
 						addEventListener: () => {},
 						removeEventListener: () => {},
+						addListener: () => {},
+						removeListener: () => {},
+						dispatchEvent: () => true as any,
+						onchange: null,
 					};
 				}
 				return originalMatchMedia(query);

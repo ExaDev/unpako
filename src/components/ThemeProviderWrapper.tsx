@@ -19,7 +19,7 @@ export function ThemeProviderWrapper({ children }: ThemeProviderWrapperProps) {
 	});
 
 	return (
-		<MantineProvider theme={mantineTheme} colorScheme={effectiveTheme}>
+		<MantineProvider theme={mantineTheme} forceColorScheme={effectiveTheme}>
 			{children}
 		</MantineProvider>
 	);
