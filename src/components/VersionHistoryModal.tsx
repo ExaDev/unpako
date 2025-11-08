@@ -18,7 +18,7 @@ import {
 	IconCalendar,
 	IconFile,
 } from "@tabler/icons-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { FileVersion } from "../utils/db";
 import { FileVersionStorage } from "../utils/fileVersionStorage";
 import { getFilepathInfo } from "../utils/fileCompression";
@@ -54,9 +54,9 @@ export function VersionHistoryModal({
 		if (opened && filepath) {
 			loadVersions();
 		}
-	}, [opened, filepath]);
+	}, [opened, filepath, loadVersions]);
 
-	const loadVersions = async () => {
+	const loadVersions = useCallback(async () => {
 		setLoading(true);
 		try {
 			const fileVersions = await FileVersionStorage.getFileVersions(filepath);
@@ -66,7 +66,7 @@ export function VersionHistoryModal({
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [filepath]);
 
 	const handleSelectVersion = (version: FileVersion) => {
 		onSelectVersion(version);
