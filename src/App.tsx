@@ -1,35 +1,156 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
+import {
+  Container,
+  Title,
+  Text,
+  Stack,
+  Group,
+  Button,
+  Card,
+  Badge,
+  Divider
+} from '@mantine/core';
+import {
+  IconUpload,
+  IconDownload,
+  IconHistory,
+  IconPackage
+} from '@tabler/icons-react';
+import { FileUpload } from './components/FileUpload';
+import { FileDownload } from './components/FileDownload';
+import { HistoryView } from './components/HistoryView';
+import type { CompressedFile, FileHistoryItem } from './utils/fileCompression';
+import { HistoryStorage } from './utils/historyStorage';
+import './styles/global.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [activeTab, setActiveTab] = useState('upload');
+  const [stats, setStats] = useState(HistoryStorage.getStats());
+
+  const updateStats = () => {
+    setStats(HistoryStorage.getStats());
+  };
+
+  const handleFileCompressed = (compressedFile: CompressedFile, url: string) => {
+    // Store file in history
+    HistoryStorage.addUploadedFile(compressedFile, url);
+    setActiveTab('upload'); // Stay on upload tab
+    updateStats();
+  };
+
+  const handleFileDownloaded = (compressedFile: CompressedFile) => {
+    // Store file in history
+    HistoryStorage.addDownloadedFile(compressedFile);
+    setActiveTab('download'); // Stay on download tab
+    updateStats();
+  };
+
+  const handleHistoryItemSelected = (item: FileHistoryItem) => {
+    // Switch to appropriate tab based on history item type
+    setActiveTab(item.type === 'uploaded' ? 'upload' : 'download');
+  };
+
+  // Update stats on mount and when tab changes
+  useEffect(() => {
+    updateStats();
+  }, [activeTab]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Container size="xl" py="xl">
+      {/* Header */}
+      <Card withBorder p="md" mb="xl">
+        <Group justify="space-between">
+          <Group>
+            <IconPackage size={32} color="#1c7ed6" />
+            <div>
+              <Title order={1} c="blue">
+                Unpako
+              </Title>
+              <Text size="sm" c="dimmed">
+                Share large files via compressed URLs
+              </Text>
+            </div>
+          </Group>
+
+          <Group>
+            <Badge color="blue" variant="light" size="lg">
+              {stats.totalItems} files
+            </Badge>
+            <Badge color="green" variant="light" size="lg">
+              {stats.uploadedCount} uploaded
+            </Badge>
+            <Badge color="orange" variant="light" size="lg">
+              {stats.downloadedCount} downloaded
+            </Badge>
+          </Group>
+        </Group>
+
+        <Divider my="md" />
+
+        <Group gap="md">
+          <Button
+            variant={activeTab === 'upload' ? 'filled' : 'subtle'}
+            onClick={() => setActiveTab('upload')}
+            leftSection={<IconUpload size={16} />}
+          >
+            Upload & Compress
+          </Button>
+          <Button
+            variant={activeTab === 'download' ? 'filled' : 'subtle'}
+            onClick={() => setActiveTab('download')}
+            leftSection={<IconDownload size={16} />}
+          >
+            Download & Decompress
+          </Button>
+          <Button
+            variant={activeTab === 'history' ? 'filled' : 'subtle'}
+            onClick={() => setActiveTab('history')}
+            leftSection={<IconHistory size={16} />}
+          >
+            History
+          </Button>
+        </Group>
+      </Card>
+
+      <Stack gap="xl">
+        {activeTab === 'upload' && (
+          <div>
+            <Title order={2} mb="lg">
+              Upload & Compress Files
+            </Title>
+            <Text size="lg" c="dimmed" mb="xl">
+              Compress your files and share them via URL. No size limitations!
+            </Text>
+            <FileUpload onFileCompressed={handleFileCompressed} />
+          </div>
+        )}
+
+        {activeTab === 'download' && (
+          <div>
+            <Title order={2} mb="lg">
+              Download & Decompress Files
+            </Title>
+            <Text size="lg" c="dimmed" mb="xl">
+              Paste a sharing URL to download the original file.
+            </Text>
+            <FileDownload onFileDownloaded={handleFileDownloaded} />
+          </div>
+        )}
+
+        {activeTab === 'history' && (
+          <div>
+            <Title order={2} mb="lg">
+              File History
+            </Title>
+            <Text size="lg" c="dimmed" mb="xl">
+              View and manage your uploaded and downloaded files.
+            </Text>
+            <HistoryView onHistoryItemSelected={handleHistoryItemSelected} />
+          </div>
+        )}
+      </Stack>
+    </Container>
+  );
 }
 
-export default App
+export default App;
