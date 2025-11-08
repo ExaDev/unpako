@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
-import { Container, Title, Text, Group, Card, Badge, Grid, Box, Notification } from "@mantine/core";
-import { IconPackage, IconCheck, IconLink } from "@tabler/icons-react";
+import {
+	Container,
+	Title,
+	Text,
+	Group,
+	Card,
+	Badge,
+	Grid,
+	Box,
+	Notification,
+	Anchor,
+} from "@mantine/core";
+import { IconPackage, IconCheck, IconLink, IconBrandGithub } from "@tabler/icons-react";
+import packageJson from "../../package.json";
 import { FileTreeSidebar } from "./FileTreeSidebar";
 import { FileEditor } from "./FileEditor";
 import { ThemeToggle } from "./ThemeToggle";
@@ -230,6 +242,30 @@ function AppContent() {
 					/>
 				</Grid.Col>
 			</Grid>
+
+			{/* Footer */}
+			<Box mt="lg" py="md">
+				<Group justify="center" gap="xs">
+					<Text size="sm" c="dimmed">
+						Version {packageJson.version}
+					</Text>
+					<Text size="sm" c="dimmed">
+						•
+					</Text>
+					<Anchor
+						size="sm"
+						href={`https://github.com/ExaDev/unpako/releases/tag/v${packageJson.version}`}
+						target="_blank"
+						rel="noopener noreferrer"
+						fw={500}
+					>
+						<Group gap={4} align="center">
+							<IconBrandGithub size={12} />
+							Release Notes
+						</Group>
+					</Anchor>
+				</Group>
+			</Box>
 
 			{/* Version History Modal */}
 			<VersionHistoryModal
