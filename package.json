@@ -65,6 +65,7 @@
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
     "@vitest/browser": "^4.0.8",
+    "@vitest/coverage-v8": "^4.0.8",
     "@vitest/ui": "^4.0.8",
     "emoji-regex": "^10.6.0",
     "eslint": "^9.36.0",
