@@ -315,7 +315,7 @@ jobs:
         if: always() && steps.playwright-cache.outputs.cache-hit != 'true'
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ steps.playwright-cache.outputs.cache-primary-key }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Upload E2E test results
         uses: actions/upload-artifact@v4
