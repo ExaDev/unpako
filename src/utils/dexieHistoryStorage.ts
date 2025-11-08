@@ -7,7 +7,7 @@ export class DexieHistoryStorage {
 	// Get all history items
 	static async getHistory(): Promise<FileHistoryItem[]> {
 		const items = await safeDbOperation(async () => {
-			const results = await db.fileHistory.orderBy("timestamp").reverse().toArray();
+			const results = await db.fileHistory.orderBy("modifiedAt").reverse().toArray();
 			return results;
 		});
 		return items || [];
@@ -21,14 +21,14 @@ export class DexieHistoryStorage {
 				id: this.generateId(),
 			};
 
-			// Add to database (Dexie will handle ordering by timestamp)
+			// Add to database (Dexie will handle ordering by modifiedAt)
 			await db.fileHistory.add(newItem);
 
-			// Limit history size by removing oldest items
+			// Limit history size by removing oldest items (by createdAt)
 			const count = await db.fileHistory.count();
 			if (count > MAX_HISTORY_ITEMS) {
 				const excessCount = count - MAX_HISTORY_ITEMS;
-				const oldestItems = await db.fileHistory.orderBy("timestamp").limit(excessCount).toArray();
+				const oldestItems = await db.fileHistory.orderBy("createdAt").limit(excessCount).toArray();
 				const oldestIds = oldestItems.map(item => item.id);
 				await db.fileHistory.bulkDelete(oldestIds);
 			}
@@ -62,7 +62,12 @@ export class DexieHistoryStorage {
 		await safeDbOperation(async () => {
 			const item = await db.fileHistory.get(id);
 			if (item) {
-				const updatedItem = { ...item, ...updates };
+				// When updating, set modifiedAt to current time unless it's being explicitly set
+				const updatedItem = {
+					...item,
+					...updates,
+					modifiedAt: updates.modifiedAt || Date.now(),
+				};
 				await db.fileHistory.update(id, updatedItem);
 			}
 		});
@@ -143,6 +148,14 @@ export class DexieHistoryStorage {
 							item.name = undefined;
 						}
 
+						// Migrate old timestamp to createdAt and modifiedAt
+						if (item.timestamp && !item.createdAt && !item.modifiedAt) {
+							const now = Date.now();
+							item.createdAt = now;
+							item.modifiedAt = now;
+							item.timestamp = undefined;
+						}
+
 						itemsToAdd.push(item as FileHistoryItem);
 						imported++;
 					} catch (error) {
@@ -158,7 +171,7 @@ export class DexieHistoryStorage {
 					const totalCount = await db.fileHistory.count();
 					if (totalCount > MAX_HISTORY_ITEMS) {
 						const excessCount = totalCount - MAX_HISTORY_ITEMS;
-						const oldestItems = await db.fileHistory.orderBy("timestamp").limit(excessCount).toArray();
+						const oldestItems = await db.fileHistory.orderBy("createdAt").limit(excessCount).toArray();
 						const oldestIds = oldestItems.map(item => item.id);
 						await db.fileHistory.bulkDelete(oldestIds);
 					}
