@@ -12,9 +12,9 @@ test.describe("URL Content Loading", () => {
 	});
 
 	test("should load content when navigating to URL with data", async ({ page }) => {
-		// Navigate directly to a URL with compressed content
+		// Navigate directly to a URL with compressed content (new format with createdAt and modifiedAt)
 		await page.goto(
-			"http://localhost:5174/?filepath=Hello.txt&timestamp=1762602312071&data=eJzzSM3JyVcIzy%2FKSVEEABxJBD4%3D",
+			"http://localhost:5174/?filepath=Hello.txt&createdAt=1762602312071&modifiedAt=1762602312071&data=eJzzSM3JyVcIzy%2FKSVEEABxJBD4%3D",
 			{ timeout: 10000 }
 		);
 
@@ -47,11 +47,12 @@ test.describe("URL Content Loading", () => {
 		// Wait for URL to update
 		await page.waitForTimeout(500);
 
-		// Check that URL contains data parameter
+		// Check that URL contains data parameter with new timestamp format
 		const currentUrl = page.url();
 		expect(currentUrl).toContain("data=");
 		expect(currentUrl).toContain("filepath=");
-		expect(currentUrl).toContain("timestamp=");
+		expect(currentUrl).toContain("createdAt=");
+		expect(currentUrl).toContain("modifiedAt=");
 	});
 
 	test("should update filepath in URL when changed", async ({ page }) => {
@@ -73,9 +74,9 @@ test.describe("URL Content Loading", () => {
 	});
 
 	test("should clear URL parameters when content is cleared", async ({ page }) => {
-		// Navigate with data first
+		// Navigate with data first (new format)
 		await page.goto(
-			"http://localhost:5174/?filepath=Hello.txt&timestamp=1762602312071&data=eJzzSM3JyVcIzy%2FKSVEEABxJBD4%3D",
+			"http://localhost:5174/?filepath=Hello.txt&createdAt=1762602312071&modifiedAt=1762602312071&data=eJzzSM3JyVcIzy%2FKSVEEABxJBD4%3D",
 			{ timeout: 10000 }
 		);
 		await page.waitForLoadState("domcontentloaded");
@@ -170,5 +171,34 @@ test.describe("URL Content Loading", () => {
 		const currentUrl = page.url();
 		expect(currentUrl).toContain("filepath=special-%E4%B8%96%E7%95%8C.txt");
 		expect(currentUrl).toContain("data=");
+	});
+
+	test("should handle backward compatibility with old timestamp URLs", async ({ page }) => {
+		// Navigate with old timestamp format URL
+		await page.goto(
+			"http://localhost:5174/?filepath=Backward.txt&timestamp=1762602312071&data=eJzzSM3JyVcIzy%2FKSVEEABxJBD4%3D",
+			{ timeout: 10000 }
+		);
+
+		// Wait for page to be fully loaded
+		await page.waitForLoadState("networkidle");
+
+		// Wait for app components to mount
+		await page.waitForSelector('textarea[placeholder*="Paste your text"]', { timeout: 5000 });
+		await page.waitForSelector('input[placeholder*="filepath"]', { timeout: 5000 });
+
+		// Wait a bit more for the content loading effect to run
+		await page.waitForTimeout(2000);
+
+		// Check that filepath is populated
+		const filepathInput = page.locator('input[placeholder*="filepath"]');
+		await expect(filepathInput).toHaveValue("Backward.txt");
+
+		// Check that text content is populated
+		const textArea = page.locator('textarea[placeholder*="Paste your text"]');
+		await expect(textArea).toHaveValue("Hello World!");
+
+		// Check that the "Ready to Share" alert is visible
+		await expect(page.locator("text=Ready to Share")).toBeVisible();
 	});
 });
