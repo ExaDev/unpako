@@ -1,0 +1,7 @@
+.tree {
+	user-select: none;
+}
+
+.tree :global(.mantine-ActionIcon-root) {
+	transition: transform 200ms ease;
+}

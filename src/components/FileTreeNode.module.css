@@ -1,0 +1,40 @@
+.node {
+	display: flex;
+	align-items: center;
+	padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+	border-radius: var(--mantine-radius-sm);
+	cursor: pointer;
+	transition: background-color 100ms ease;
+	user-select: none;
+}
+
+.node:hover {
+	background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+}
+
+.node.selected {
+	background-color: var(--mantine-primary-color-filled);
+	color: var(--mantine-color-white);
+}
+
+.node.selected:hover {
+	background-color: var(--mantine-primary-color-filled-hover);
+}
+
+.filename {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.folderName {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.empty {
+	min-height: rem(20);
+}
