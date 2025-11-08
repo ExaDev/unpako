@@ -11,13 +11,12 @@ export class HistoryStorage {
 			const history = stored ? JSON.parse(stored) : [];
 
 			// Migrate old items that use 'name' to 'filepath'
-			return history.map((item: FileHistoryItem | { name?: string; filepath?: string }) => {
+			return history.map((item: FileHistoryItem & { name?: string }) => {
 				if (item.name && !item.filepath) {
+					const { name, ...rest } = item;
 					return {
-						...item,
-						filepath: item.name,
-						// Remove the old name property to clean up
-						name: undefined,
+						...rest,
+						filepath: name,
 					} as FileHistoryItem;
 				}
 				return item as FileHistoryItem;
