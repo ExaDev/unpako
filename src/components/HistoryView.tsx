@@ -14,6 +14,8 @@ import {
 	ScrollArea,
 	Tooltip,
 	Box,
+	Select,
+	SegmentedControl,
 } from "@mantine/core";
 import {
 	IconHistory,
@@ -25,6 +27,8 @@ import {
 	IconCalendar,
 	IconFileText,
 	IconShare,
+	IconSortAscending,
+	IconSortDescending,
 } from "@tabler/icons-react";
 import { HistoryStorage } from "../utils/historyStorage";
 import {
@@ -41,6 +45,8 @@ interface HistoryViewProps {
 
 export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 	const [history, setHistory] = useState<FileHistoryItem[]>(() => HistoryStorage.getHistory());
+	const [sortBy, setSortBy] = useState<"timestamp" | "filepath" | "size">("timestamp");
+	const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 	const [showClearModal, setShowClearModal] = useState(false);
 	const [showImportModal, setShowImportModal] = useState(false);
 	const [importData, setImportData] = useState("");
@@ -55,6 +61,31 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 	const refreshHistory = () => {
 		setHistory(HistoryStorage.getHistory());
 	};
+
+	const sortHistory = (items: FileHistoryItem[]): FileHistoryItem[] => {
+		const sorted = [...items].sort((a, b) => {
+			let comparison = 0;
+
+			switch (sortBy) {
+				case "filepath":
+					comparison = a.filepath.localeCompare(b.filepath);
+					break;
+				case "size":
+					comparison = a.size - b.size;
+					break;
+				case "timestamp":
+				default:
+					comparison = a.timestamp - b.timestamp;
+					break;
+			}
+
+			return sortOrder === "asc" ? comparison : -comparison;
+		});
+
+		return sorted;
+	};
+
+	const sortedHistory = sortHistory(history);
 
 	const handleDelete = (id: string) => {
 		HistoryStorage.removeFromHistory(id);
@@ -179,6 +210,29 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 
 			{/* Actions */}
 			<Group mb="md">
+				<Select
+					label="Sort by"
+					data={[
+						{ value: "timestamp", label: "Date" },
+						{ value: "filepath", label: "Filepath" },
+						{ value: "size", label: "File Size" },
+					]}
+					value={sortBy}
+					onChange={value => setSortBy(value as "timestamp" | "filepath" | "size")}
+					w={120}
+					size="sm"
+				/>
+
+				<SegmentedControl
+					size="sm"
+					data={[
+						{ label: <IconSortDescending size={16} />, value: "desc" },
+						{ label: <IconSortAscending size={16} />, value: "asc" },
+					]}
+					value={sortOrder}
+					onChange={value => setSortOrder(value as "asc" | "desc")}
+				/>
+
 				<Button
 					variant="outline"
 					leftSection={<IconFileExport size={16} />}
@@ -208,7 +262,7 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 			</Group>
 
 			{/* History Items */}
-			{history.length === 0 ? (
+			{sortedHistory.length === 0 ? (
 				<Card shadow="sm" withBorder p="xl">
 					<Text ta="center" c="dimmed" size="lg">
 						No files in history yet
@@ -220,14 +274,19 @@ export function HistoryView({ onHistoryItemSelected }: HistoryViewProps) {
 			) : (
 				<ScrollArea h={400}>
 					<Stack gap="sm">
-						{history.map(item => (
+						{sortedHistory.map(item => (
 							<Card key={item.id} shadow="sm" withBorder p="md">
 								<Group justify="space-between" align="flex-start">
 									<div style={{ flex: 1 }}>
 										<Group mb="xs">
 											<IconFileText size={16} />
-											<Text fw={500} size="md" lineClamp={1}>
-												{item.name}
+											<Text
+												fw={500}
+												size="md"
+												lineClamp={1}
+												style={{ fontFamily: "monospace", flex: 1, minWidth: 0 }}
+											>
+												{item.filepath}
 											</Text>
 										</Group>
 

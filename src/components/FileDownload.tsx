@@ -40,7 +40,7 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 			}
 
 			// Validate the compressed data
-			if (!compressedFile.data || !compressedFile.name) {
+			if (!compressedFile.data || !compressedFile.filepath) {
 				setError("Corrupted file data in URL");
 				return;
 			}
@@ -149,8 +149,8 @@ export function FileDownload({ onFileDownloaded }: FileDownloadProps) {
 						<Stack gap="xs">
 							<Group>
 								<IconFileText size={16} color="#10b981" />
-								<Text fw={500} lineClamp={1}>
-									{downloadReady.name}
+								<Text fw={500} lineClamp={1} style={{ fontFamily: "monospace" }}>
+									{downloadReady.filepath}
 								</Text>
 								<Badge color="violet" variant="light">
 									{getCompressionRatio(downloadReady.size, downloadReady.compressedSize)}% compression

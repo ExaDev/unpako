@@ -23,10 +23,11 @@ import {
 	IconX,
 } from "@tabler/icons-react";
 import {
-	compressFile,
+	compressFileWithPath,
 	fileToUrl,
 	formatFileSize,
 	getCompressionRatio,
+	validateFilepath,
 } from "../utils/fileCompression";
 import { HistoryStorage } from "../utils/historyStorage";
 import type { CompressedFile } from "../utils/fileCompression";
@@ -39,11 +40,13 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 	const [isDragging, setIsDragging] = useState(false);
 	const [isCompressing, setIsCompressing] = useState(false);
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [customFilepath, setCustomFilepath] = useState("");
 	const [compressionResult, setCompressionResult] = useState<{
 		compressedFile: CompressedFile;
 		url: string;
 	} | null>(null);
 	const [compressionError, setCompressionError] = useState<string | null>(null);
+	const [filepathError, setFilepathError] = useState<string | null>(null);
 	const [compressionProgress, setCompressionProgress] = useState(0);
 	const [copiedToClipboard, setCopiedToClipboard] = useState(false);
 
@@ -81,6 +84,7 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 		setCompressionError(null);
 		setCompressionResult(null);
 		setSelectedFile(file);
+		setCustomFilepath("");
 		setCopiedToClipboard(false);
 	};
 
@@ -91,12 +95,34 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 		}
 	};
 
+	const handleFilepathChange = (value: string) => {
+		setCustomFilepath(value);
+
+		// Validate filepath
+		if (value && !validateFilepath(value)) {
+			setFilepathError(
+				'Invalid filepath. Avoid characters like <>:"|?* and leading/trailing slashes.'
+			);
+		} else {
+			setFilepathError(null);
+		}
+	};
+
 	const handleCompress = async () => {
 		if (!selectedFile) return;
+
+		// Validate filepath if provided
+		if (customFilepath && !validateFilepath(customFilepath)) {
+			setFilepathError(
+				'Invalid filepath. Avoid characters like <>:"|?* and leading/trailing slashes.'
+			);
+			return;
+		}
 
 		setIsCompressing(true);
 		setCompressionProgress(0);
 		setCompressionError(null);
+		setFilepathError(null);
 
 		try {
 			// Simulate progress for better UX
@@ -104,7 +130,9 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 				setCompressionProgress(prev => Math.min(prev + 10, 90));
 			}, 100);
 
-			const compressedFile = await compressFile(selectedFile);
+			// Use custom filepath if provided, otherwise use original filename
+			const finalFilepath = customFilepath || selectedFile.name;
+			const compressedFile = await compressFileWithPath(selectedFile, finalFilepath);
 			const url = fileToUrl(compressedFile);
 
 			clearInterval(progressInterval);
@@ -132,8 +160,10 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 
 	const handleReset = () => {
 		setSelectedFile(null);
+		setCustomFilepath("");
 		setCompressionResult(null);
 		setCompressionError(null);
+		setFilepathError(null);
 		setCompressionProgress(0);
 		setCopiedToClipboard(false);
 		if (fileInputRef.current) {
@@ -215,6 +245,20 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 						</Group>
 					</Card>
 
+					<TextInput
+						label="Custom filepath (optional)"
+						description="Enter a full path like 'foo/bar/baz.txt' or leave empty to use original filename"
+						placeholder="foo/bar/baz.txt"
+						value={customFilepath}
+						onChange={e => handleFilepathChange(e.target.value)}
+						error={filepathError}
+						styles={{
+							input: {
+								fontFamily: "monospace",
+							},
+						}}
+					/>
+
 					{compressionError && (
 						<Alert color="red" icon={<IconAlertCircle size={16} />} title="Compression Error">
 							{compressionError}
@@ -267,7 +311,7 @@ export function FileUpload({ onFileCompressed }: FileUploadProps) {
 						<Stack gap="xs">
 							<Group justify="space-between">
 								<Text fw={500} lineClamp={1}>
-									{compressionResult.compressedFile.name}
+									{compressionResult.compressedFile.filepath}
 								</Text>
 								<Badge color="green" variant="light">
 									{compressionRatio}% smaller

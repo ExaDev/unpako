@@ -37,7 +37,7 @@ function AppContent() {
 	const [activeTab, setActiveTab] = useState("upload");
 	const [stats, setStats] = useState(HistoryStorage.getStats());
 	const [codeInput, setCodeInput] = useState("");
-	const [fileName, setFileName] = useState("");
+	const [filepath, setFilepath] = useState("");
 	const [shareableUrl, setShareableUrl] = useState("");
 	const [copied, setCopied] = useState(false);
 	const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -46,10 +46,10 @@ function AppContent() {
 		setStats(HistoryStorage.getStats());
 	};
 
-	const handleFileUpload = (file: File) => {
+	const handleFileUpload = (file: File | null) => {
 		if (file) {
-			// Set filename with extension
-			setFileName(file.name);
+			// Set filepath with extension
+			setFilepath(file.name);
 
 			// Read file content
 			const reader = new FileReader();
@@ -66,14 +66,14 @@ function AppContent() {
 		}
 	};
 
-	// Generate shareable URL whenever content or filename changes (but not during initial load)
+	// Generate shareable URL whenever content or filepath changes (but not during initial load)
 	useEffect(() => {
 		// Skip URL generation during initial load from URL
 		if (isInitialLoad) return;
 
 		if (codeInput.trim()) {
 			try {
-				const compressedFile = compressText(codeInput, fileName);
+				const compressedFile = compressText(codeInput, filepath || "content.txt");
 				const url = fileToUrl(compressedFile);
 				setShareableUrl(url);
 				// Update browser URL without page reload
@@ -88,7 +88,7 @@ function AppContent() {
 			const cleanUrl = window.location.origin + window.location.pathname;
 			window.history.pushState({ path: cleanUrl }, "", cleanUrl);
 		}
-	}, [codeInput, fileName, isInitialLoad]);
+	}, [codeInput, filepath, isInitialLoad]);
 
 	const copyToClipboard = async () => {
 		if (shareableUrl) {
@@ -119,9 +119,10 @@ function AppContent() {
 	useEffect(() => {
 		const urlParams = new URLSearchParams(window.location.search);
 		const data = urlParams.get("data");
-		const name = urlParams.get("name");
+		const filepath = urlParams.get("filepath");
+		const name = urlParams.get("name"); // For backward compatibility
 
-		if (data && name) {
+		if (data && (filepath || name)) {
 			try {
 				const decodedData = decodeURIComponent(data);
 				// Decompress the content
@@ -130,7 +131,7 @@ function AppContent() {
 				const content = new TextDecoder().decode(decompressed);
 
 				setCodeInput(content);
-				setFileName(name);
+				setFilepath(filepath || name || "content.txt");
 				// Set initial load flag to prevent immediate URL regeneration
 				setTimeout(() => setIsInitialLoad(false), 100);
 			} catch (error) {
@@ -229,11 +230,16 @@ function AppContent() {
 							/>
 
 							<TextInput
-								placeholder="Enter filename with extension (e.g., config.json, script.py, document.txt)"
-								label="Filename"
-								description="Optional: Specify a filename with extension for better organization"
-								value={fileName}
-								onChange={event => setFileName(event.currentTarget.value)}
+								placeholder="Enter filepath with extension (e.g., config.json, scripts/main.py, docs/document.txt)"
+								label="Filepath"
+								description="Optional: Specify a full filepath with extension for better organization (e.g., 'foo/bar/baz.txt')"
+								value={filepath}
+								onChange={event => setFilepath(event.currentTarget.value)}
+								styles={{
+									input: {
+										fontFamily: "monospace",
+									},
+								}}
 								leftSection={<IconFileText size={16} />}
 							/>
 
@@ -245,7 +251,11 @@ function AppContent() {
 								maxRows={25}
 								value={codeInput}
 								onChange={event => setCodeInput(event.currentTarget.value)}
-								fontFamily="monospace"
+								styles={{
+									input: {
+										fontFamily: "monospace",
+									},
+								}}
 								resize="vertical"
 								autosize
 							/>
@@ -254,7 +264,7 @@ function AppContent() {
 								<Alert icon={<IconAlertCircle size={16} />} title="Text Ready" color="blue" variant="light">
 									{codeInput.length} characters ready for compression.
 									{codeInput.split("\n").length > 1 && ` ${codeInput.split("\n").length} lines detected.`}
-									{fileName && ` Filename: ${fileName}`}
+									{filepath && ` Filepath: ${filepath}`}
 								</Alert>
 							)}
 
@@ -289,9 +299,9 @@ function AppContent() {
 									variant="light"
 									onClick={() => {
 										setCodeInput("");
-										setFileName("");
+										setFilepath("");
 									}}
-									disabled={!codeInput && !fileName}
+									disabled={!codeInput && !filepath}
 								>
 									Clear
 								</Button>
