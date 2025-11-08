@@ -3,6 +3,8 @@
  */
 const Configuration = {
   branches: ["main"],
+  repositoryUrl: "https://github.com/ExaDev/unpako",
+  tagFormat: "v${version}",
   plugins: [
     [
       "@semantic-release/commit-analyzer",
@@ -31,7 +33,12 @@ const Configuration = {
         changelogFile: "CHANGELOG.md",
       },
     ],
-    "@semantic-release/npm",
+    [
+      "@semantic-release/npm",
+      {
+        npmPublish: false,
+      },
+    ],
     [
       "@semantic-release/github",
       {
