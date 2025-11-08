@@ -5,7 +5,8 @@ export interface CompressedFile {
 	filepath: string; // full file path like "foo/bar/baz.txt" or "filename.txt" for root level
 	size: number;
 	compressedSize: number;
-	timestamp: number;
+	createdAt: number;
+	modifiedAt: number;
 }
 
 export interface FileHistoryItem extends CompressedFile {
@@ -30,12 +31,14 @@ export function compressFile(file: File): Promise<CompressedFile> {
 				// Convert to base64 for URL encoding
 				const base64 = btoa(String.fromCharCode(...compressed));
 
+				const now = Date.now();
 				const compressedFile: CompressedFile = {
 					data: base64,
 					filepath: file.name,
 					size: file.size,
 					compressedSize: compressed.length,
-					timestamp: Date.now(),
+					createdAt: now,
+					modifiedAt: now,
 				};
 
 				resolve(compressedFile);
@@ -65,12 +68,14 @@ export function compressFileWithPath(file: File, filepath: string): Promise<Comp
 				// Convert to base64 for URL encoding
 				const base64 = btoa(String.fromCharCode(...compressed));
 
+				const now = Date.now();
 				const compressedFile: CompressedFile = {
 					data: base64,
 					filepath: normalizeFilepath(filepath),
 					size: file.size,
 					compressedSize: compressed.length,
-					timestamp: Date.now(),
+					createdAt: now,
+					modifiedAt: now,
 				};
 
 				resolve(compressedFile);
@@ -97,12 +102,14 @@ export function compressText(content: string, filepath: string): CompressedFile 
 		// Convert to base64 for URL encoding
 		const base64 = btoa(String.fromCharCode(...compressed));
 
+		const now = Date.now();
 		return {
 			data: base64,
 			filepath: filepath || "content.txt",
 			size: uint8Array.length,
 			compressedSize: compressed.length,
-			timestamp: Date.now(),
+			createdAt: now,
+			modifiedAt: now,
 		};
 	} catch (error) {
 		throw new Error("Failed to compress text: " + error);
@@ -130,7 +137,8 @@ export function fileToUrl(compressedFile: CompressedFile): string {
 	const encodedData = encodeURIComponent(compressedFile.data);
 	const params = new URLSearchParams({
 		filepath: compressedFile.filepath,
-		timestamp: compressedFile.timestamp.toString(),
+		createdAt: compressedFile.createdAt.toString(),
+		modifiedAt: compressedFile.modifiedAt.toString(),
 		data: encodedData,
 	});
 	return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
@@ -142,13 +150,13 @@ export function urlToFile(url: string): CompressedFile | null {
 		const urlObj = new URL(url);
 		const params = urlObj.searchParams;
 
-		// Try new format first (separate parameters with filepath)
+		// Try newest format (separate parameters with createdAt and modifiedAt)
 		const filepath = params.get("filepath");
-		const timestamp = params.get("timestamp");
+		const createdAt = params.get("createdAt");
+		const modifiedAt = params.get("modifiedAt");
 		const data = params.get("data");
 
-		// If all required parameters are present, use new format
-		if (data && filepath && timestamp) {
+		if (data && filepath && createdAt && modifiedAt) {
 			const decodedData = decodeURIComponent(data);
 
 			// Calculate sizes from the actual data by decompressing
@@ -169,7 +177,37 @@ export function urlToFile(url: string): CompressedFile | null {
 				filepath,
 				size: originalSize,
 				compressedSize,
-				timestamp: parseInt(timestamp, 10),
+				createdAt: parseInt(createdAt, 10),
+				modifiedAt: parseInt(modifiedAt, 10),
+			};
+		}
+
+		// Try old format with single timestamp
+		const timestamp = params.get("timestamp");
+		if (data && filepath && timestamp) {
+			const decodedData = decodeURIComponent(data);
+			const parsedTimestamp = parseInt(timestamp, 10);
+
+			// Calculate sizes from the actual data by decompressing
+			let originalSize = 0;
+			try {
+				const compressed = Uint8Array.from(atob(decodedData), c => c.charCodeAt(0));
+				const decompressed = pako.inflate(compressed);
+				originalSize = decompressed.length;
+			} catch {
+				// Fallback if decompression fails
+				originalSize = 0;
+			}
+
+			const compressedSize = decodedData.length;
+
+			return {
+				data: decodedData,
+				filepath,
+				size: originalSize,
+				compressedSize,
+				createdAt: parsedTimestamp,
+				modifiedAt: parsedTimestamp,
 			};
 		}
 
@@ -177,6 +215,7 @@ export function urlToFile(url: string): CompressedFile | null {
 		const name = params.get("name");
 		if (data && name && timestamp) {
 			const decodedData = decodeURIComponent(data);
+			const parsedTimestamp = parseInt(timestamp, 10);
 
 			// Calculate sizes from the actual data by decompressing
 			let originalSize = 0;
@@ -196,7 +235,8 @@ export function urlToFile(url: string): CompressedFile | null {
 				filepath: name, // Convert old name to filepath
 				size: originalSize,
 				compressedSize,
-				timestamp: parseInt(timestamp, 10),
+				createdAt: parsedTimestamp,
+				modifiedAt: parsedTimestamp,
 			};
 		}
 
@@ -206,10 +246,11 @@ export function urlToFile(url: string): CompressedFile | null {
 			const decoded = decodeURIComponent(dataParam);
 			const fileData = JSON.parse(decoded) as
 				| CompressedFile
-				| { data: string; name: string; size: number; compressedSize: number; timestamp: number };
+				| { data: string; name: string; size: number; compressedSize: number; timestamp: number }
+				| { data: string; filepath: string; size: number; compressedSize: number; timestamp: number };
 
-			// Handle new format with filepath
-			if ("filepath" in fileData) {
+			// Handle new format with both timestamps
+			if ("createdAt" in fileData && "modifiedAt" in fileData) {
 				// Validate required fields
 				if (!fileData.data || !fileData.filepath || !fileData.size) {
 					throw new Error("Invalid file data format");
@@ -217,11 +258,38 @@ export function urlToFile(url: string): CompressedFile | null {
 				return fileData as CompressedFile;
 			}
 
-			// Handle old format with name - convert to new format
-			if (fileData.data && fileData.name && fileData.size) {
+			// Handle format with filepath but old timestamp
+			if ("filepath" in fileData && "timestamp" in fileData) {
+				const oldFileData = fileData as {
+					data: string;
+					filepath: string;
+					size: number;
+					compressedSize: number;
+					timestamp: number;
+				};
+				const timestamp = oldFileData.timestamp;
 				return {
-					...fileData,
-					filepath: fileData.name,
+					...oldFileData,
+					createdAt: timestamp,
+					modifiedAt: timestamp,
+				} as CompressedFile;
+			}
+
+			// Handle old format with name - convert to new format
+			if (fileData.data && "name" in fileData && fileData.size) {
+				const oldFileData = fileData as {
+					data: string;
+					name: string;
+					size: number;
+					compressedSize: number;
+					timestamp?: number;
+				};
+				const timestamp = oldFileData.timestamp || Date.now();
+				return {
+					...oldFileData,
+					filepath: oldFileData.name,
+					createdAt: timestamp,
+					modifiedAt: timestamp,
 				} as CompressedFile;
 			}
 
