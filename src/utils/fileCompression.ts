@@ -384,3 +384,29 @@ export function getFilepathInfo(filepath: string) {
 export function getFilename(filepath: string): string {
 	return filepath.split("/").pop() || filepath;
 }
+
+// Compression utilities for text content
+export function compressData(content: string): Uint8Array {
+	const encoder = new TextEncoder();
+	const uint8Array = encoder.encode(content);
+	return pako.deflate(uint8Array);
+}
+
+export function decompressData(compressedData: Uint8Array): string {
+	const decompressed = pako.inflate(compressedData);
+	const decoder = new TextDecoder();
+	return decoder.decode(decompressed);
+}
+
+export function encodeToBase64(data: Uint8Array): string {
+	return btoa(String.fromCharCode(...data));
+}
+
+export function decodeFromBase64(base64: string): Uint8Array {
+	return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+}
+
+export function generateShareableUrl(content: string, filepath: string): string {
+	const compressedFile = compressText(content, filepath);
+	return fileToUrl(compressedFile);
+}

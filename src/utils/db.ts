@@ -1,6 +1,9 @@
 import Dexie, { type Table } from "dexie";
 import type { FileHistoryItem } from "./fileCompression";
 
+// Re-export FileHistoryItem for convenience
+export type { FileHistoryItem } from "./fileCompression";
+
 // Database class for Unpako file history
 export class UnpakoDB extends Dexie {
 	fileHistory!: Table<FileHistoryItem>;

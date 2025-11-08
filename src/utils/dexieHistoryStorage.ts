@@ -97,6 +97,44 @@ export class DexieHistoryStorage {
 		return Date.now().toString(36) + Math.random().toString(36).substr(2);
 	}
 
+	// Alias methods for compatibility with existing code
+	static async getAllItems(): Promise<FileHistoryItem[]> {
+		return this.getHistory();
+	}
+
+	static async addItem(item: FileHistoryItem): Promise<void> {
+		// Check if item already exists, if so update it, otherwise add it
+		const existingItem = await this.getHistoryItem(item.id);
+		if (existingItem) {
+			// Update existing item
+			await this.updateHistoryItem(item.id, {
+				data: item.data,
+				filepath: item.filepath,
+				size: item.size,
+				compressedSize: item.compressedSize,
+				modifiedAt: item.modifiedAt,
+				url: item.url,
+				type: item.type,
+			});
+		} else {
+			// Add new item (without id, as addToHistory will generate one)
+			await this.addToHistory({
+				data: item.data,
+				filepath: item.filepath,
+				size: item.size,
+				compressedSize: item.compressedSize,
+				createdAt: item.createdAt,
+				modifiedAt: item.modifiedAt,
+				url: item.url,
+				type: item.type,
+			});
+		}
+	}
+
+	static async deleteItem(id: string): Promise<void> {
+		await this.removeFromHistory(id);
+	}
+
 	// Export history as JSON
 	static async exportHistory(): Promise<string> {
 		const history = await this.getHistory();
