@@ -450,7 +450,9 @@ jobs:
           path: |
             ~/.pnpm-store
             node_modules
-          key: ${{ needs.setup.outputs.cache-key }}
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node_modules-
 
       - name: Get Playwright cache
         id: playwright-cache
