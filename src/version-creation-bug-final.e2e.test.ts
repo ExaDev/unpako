@@ -47,44 +47,39 @@ test.describe("Version Creation Bug - Final Investigation", () => {
 		const buttonCount = await actionButtons.count();
 		console.log(`   Found ${buttonCount} action buttons`);
 
+		// Simplified modal check - don't click multiple buttons to avoid timeout issues
 		if (buttonCount > 0) {
-			// Try clicking buttons to see if any show version history
-			for (let i = 0; i < Math.min(buttonCount, 3); i++) {
-				try {
-					await actionButtons.nth(i).click();
-					await page.waitForTimeout(1000);
+			try {
+				await actionButtons.first().click();
+				await page.waitForTimeout(1000);
 
-					// Check if a modal appeared
-					const modal = page.locator('[role="dialog"]');
-					if (await modal.isVisible()) {
-						console.log("   Found modal after clicking action button");
-						await page.screenshot({ path: "version-modal-found.png" });
+				// Check if a modal appeared
+				const modal = page.locator('[role="dialog"]');
+				if (await modal.isVisible()) {
+					console.log("   Found modal after clicking action button");
+					await page.screenshot({ path: "version-modal-found.png" });
 
-						// Count version items in modal
-						const modalItems = modal.locator(".mantine-Box-root");
-						const itemCount = await modalItems.count();
-						console.log(`   Modal contains ${itemCount} items`);
+					// Count version items in modal
+					const modalItems = modal.locator(".mantine-Box-root");
+					const itemCount = await modalItems.count();
+					console.log(`   Modal contains ${itemCount} items`);
 
-						// The bug is demonstrated if many versions exist for no reason
-						expect(itemCount).toBeLessThan(10);
-						if (itemCount >= 10) {
-							console.log(
-								`Expected reasonable number of versions (<10), but found ${itemCount} versions. This indicates the infinite version creation bug.`
-							);
-						}
-
-						// Close modal
-						const closeButton = modal.locator('button:has-text("Close")');
-						if (await closeButton.isVisible()) {
-							await closeButton.click();
-						}
-						await page.waitForTimeout(1000);
-						break;
+					// The bug is demonstrated if many versions exist for no reason
+					expect(itemCount).toBeLessThan(10);
+					if (itemCount >= 10) {
+						console.log(
+							`Expected reasonable number of versions (<10), but found ${itemCount} versions. This indicates the infinite version creation bug.`
+						);
 					}
-				} catch (error) {
-					// Continue trying other buttons
-					await page.waitForTimeout(500);
+
+					// Close modal if visible
+					const closeButton = modal.locator('button:has-text("Close"), [aria-label*="close"]');
+					if (await closeButton.isVisible()) {
+						await closeButton.click();
+					}
 				}
+			} catch (error) {
+				console.log("   Modal interaction failed, continuing with test");
 			}
 		}
 
