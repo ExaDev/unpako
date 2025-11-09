@@ -3,6 +3,9 @@ import { test, expect } from "@playwright/test";
 test.describe("Version Creation Bug Investigation", () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto("/");
+		// Wait for the page to be fully loaded
+		await page.waitForLoadState("domcontentloaded");
+		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 10000 });
 	});
 
 	test("should identify infinite version creation bug", async ({ page }) => {
@@ -10,12 +13,22 @@ test.describe("Version Creation Bug Investigation", () => {
 
 		// Step 1: Create initial file
 		console.log("Creating initial file...");
+
+		// Fill filepath first to trigger edit mode
+		await page.waitForSelector('input[placeholder*="File path with extension (e.g., example.txt)"]', {
+			timeout: 10000,
+		});
+		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', "test.js");
+		await page.waitForTimeout(1000);
+
+		// Now the textarea should be available
+		await page.waitForSelector('textarea[placeholder="Enter your text here..."]', { timeout: 10000 });
 		await page.fill(
 			'textarea[placeholder="Enter your text here..."]',
 			"console.log('Initial content');"
 		);
-		await page.fill('input[placeholder="File path with extension (e.g., example.txt)"]', "test.js");
-		await page.waitForTimeout(2000);
+
+		await page.waitForTimeout(1000);
 
 		// Step 2: Try to find file in sidebar
 		console.log("Looking for files in sidebar...");
@@ -152,9 +165,15 @@ test.describe("Version Creation Bug Investigation", () => {
 
 	test("should manually demonstrate the version creation issue", async ({ page }) => {
 		// Create initial file
+		await page.waitForSelector('input[placeholder*="File path with extension (e.g., example.txt)"]', {
+			timeout: 10000,
+		});
+		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', "demo.js");
+		await page.waitForTimeout(1000);
+
+		await page.waitForSelector('textarea[placeholder="Enter your text here..."]', { timeout: 10000 });
 		await page.fill('textarea[placeholder="Enter your text here..."]', "const test = 'initial';");
-		await page.fill('input[placeholder="File path with extension (e.g., example.txt)"]', "demo.js");
-		await page.waitForTimeout(3000);
+		await page.waitForTimeout(2000);
 
 		// Clear and re-add the same content (simulating file selection)
 		for (let i = 0; i < 3; i++) {

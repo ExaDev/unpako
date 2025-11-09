@@ -3,6 +3,9 @@ import { test, expect } from "@playwright/test";
 test.describe("File Version Creation", () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto("/");
+		// Wait for the page to be fully loaded
+		await page.waitForLoadState("domcontentloaded");
+		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 10000 });
 	});
 
 	async function getVersionCount(page: any): Promise<number> {
@@ -22,8 +25,16 @@ test.describe("File Version Creation", () => {
 	}
 
 	async function createTestFile(page: any, content: string, filepath: string): Promise<void> {
+		// Fill filepath first to trigger edit mode
+		await page.waitForSelector('input[placeholder*="File path with extension (e.g., example.txt)"]', {
+			timeout: 10000,
+		});
+		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', filepath);
+		await page.waitForTimeout(500);
+
+		// Now the textarea should be available
+		await page.waitForSelector('textarea[placeholder="Enter your text here..."]', { timeout: 10000 });
 		await page.fill('textarea[placeholder="Enter your text here..."]', content);
-		await page.fill('input[placeholder*="File path with extension"]', filepath);
 		await page.waitForTimeout(1000);
 	}
 
@@ -136,10 +147,10 @@ test.describe("File Version Creation", () => {
 		const initialCount = await getVersionCount(page);
 
 		// Change only the file path, not content
-		await page.fill('input[placeholder*="File path with extension"]', "test2.js");
+		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', "test2.js");
 		await page.waitForTimeout(1000);
 
-		await page.fill('input[placeholder*="File path with extension"]', "test3.js");
+		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', "test3.js");
 		await page.waitForTimeout(1000);
 
 		const finalCount = await getVersionCount(page);

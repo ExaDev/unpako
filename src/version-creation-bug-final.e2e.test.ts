@@ -12,7 +12,9 @@ test.describe("Version Creation Bug - Final Investigation", () => {
 
 		// Step 1: Create initial file
 		console.log("1. Creating initial file...");
-		const filepathInput = page.locator('input[placeholder*="File path with extension"]');
+		const filepathInput = page.locator(
+			'input[placeholder*="File path with extension (e.g., example.txt)"]'
+		);
 		const textArea = page.locator("textarea");
 
 		await filepathInput.fill("version-test.js");
@@ -115,7 +117,9 @@ test.describe("Version Creation Bug - Final Investigation", () => {
 	test("should identify the root cause of version creation", async ({ page }) => {
 		console.log("=== Root Cause Analysis ===");
 
-		const filepathInput = page.locator('input[placeholder*="File path with extension"]');
+		const filepathInput = page.locator(
+			'input[placeholder*="File path with extension (e.g., example.txt)"]'
+		);
 		const textArea = page.locator("textarea");
 
 		// Create a file
