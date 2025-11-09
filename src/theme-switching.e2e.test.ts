@@ -7,12 +7,12 @@ test.describe("Theme Switching Functionality", () => {
 
 		// Wait for the app to load with simpler approach
 		await page.waitForLoadState("domcontentloaded");
-		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 10000 });
+		await page.waitForSelector('.mantine-ActionIcon-root[data-variant="subtle"]', { timeout: 10000 });
 	});
 
 	test("should display theme toggle button in header", async ({ page }) => {
 		// Find the theme toggle button
-		const themeButton = page.locator('[aria-label*="Theme"]');
+		const themeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 
 		// Verify the button is visible and has correct initial state
 		await expect(themeButton).toBeVisible();
@@ -21,7 +21,7 @@ test.describe("Theme Switching Functionality", () => {
 	});
 
 	test("should cycle through three theme states", async ({ page }) => {
-		const themeButton = page.locator('[aria-label*="Theme"]');
+		const themeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 
 		// Get initial theme state
 		const initialState = await themeButton.getAttribute("aria-label");
@@ -49,7 +49,7 @@ test.describe("Theme Switching Functionality", () => {
 	});
 
 	test("should persist theme choice in localStorage", async ({ page }) => {
-		const themeButton = page.locator('[aria-label*="Theme"]');
+		const themeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 
 		// Get initial localStorage value
 		const initialStorage = await page.evaluate(() => localStorage.getItem("unpako-theme"));
@@ -64,7 +64,7 @@ test.describe("Theme Switching Functionality", () => {
 	});
 
 	test("should show correct tooltip with next theme state", async ({ page }) => {
-		const themeButton = page.locator('[aria-label*="Theme"]');
+		const themeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 
 		// Hover over the theme button to show tooltip
 		await themeButton.hover();
@@ -85,7 +85,7 @@ test.describe("Theme Switching Functionality", () => {
 	});
 
 	test("should maintain theme across page refreshes", async ({ page }) => {
-		const themeButton = page.locator('[aria-label*="Theme"]');
+		const themeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 
 		// Change theme to light mode
 		let currentLabel = await themeButton.getAttribute("aria-label");
@@ -104,7 +104,7 @@ test.describe("Theme Switching Functionality", () => {
 		await page.waitForLoadState("networkidle");
 
 		// Re-find the theme button after refresh
-		const refreshedThemeButton = page.locator('[aria-label*="Theme"]');
+		const refreshedThemeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 		await expect(refreshedThemeButton).toBeVisible();
 
 		// Verify theme persisted
@@ -113,7 +113,7 @@ test.describe("Theme Switching Functionality", () => {
 	});
 
 	test("should apply theme styles to the page", async ({ page }) => {
-		const themeButton = page.locator('[aria-label*="Theme"]');
+		const themeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 
 		// Click to toggle to opposite theme
 		await themeButton.click();
@@ -135,7 +135,7 @@ test.describe("Theme Switching Functionality", () => {
 	});
 
 	test("should handle rapid clicking correctly", async ({ page }) => {
-		const themeButton = page.locator('[aria-label*="Theme"]');
+		const themeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 
 		// Rapid clicking 5 times
 		for (let i = 0; i < 5; i++) {
@@ -161,7 +161,7 @@ test.describe("Theme Switching Functionality", () => {
 	});
 
 	test("should show appropriate icon for each theme state", async ({ page }) => {
-		const themeButton = page.locator('[aria-label*="Theme"]');
+		const themeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 
 		// Check that the button contains an icon (SVG element)
 		const hasIcon = await themeButton.locator("svg").isVisible();
@@ -179,7 +179,7 @@ test.describe("Theme Switching Functionality", () => {
 	});
 
 	test("should work when system theme preference changes", async ({ page }) => {
-		const themeButton = page.locator('[aria-label*="Theme"]');
+		const themeButton = page.locator('.mantine-ActionIcon-root[data-variant="subtle"]');
 
 		// Set to system theme mode first
 		let currentLabel = await themeButton.getAttribute("aria-label");

@@ -7,7 +7,7 @@ test.describe("URL Content Loading", () => {
 
 		// Wait for the app to load - simpler approach
 		await page.waitForLoadState("domcontentloaded");
-		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 10000 });
+		await page.waitForSelector('.mantine-ActionIcon-root[data-variant="subtle"]', { timeout: 10000 });
 	});
 
 	test("should load content when navigating to URL with data", async ({ page }) => {

@@ -5,7 +5,7 @@ test.describe("Version Creation Bug - Final Investigation", () => {
 		await page.goto("/", { timeout: 30000 });
 		await page.waitForLoadState("domcontentloaded");
 		// Wait for React app to load and render (longer timeout for deployed sites)
-		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 60000 });
+		await page.waitForSelector('.mantine-ActionIcon-root[data-variant="subtle"]', { timeout: 60000 });
 	});
 
 	test("should demonstrate infinite version creation bug", async ({ page }) => {
