@@ -1,3 +1,14 @@
+## [1.3.1](https://github.com/ExaDev/unpako/compare/v1.3.0...v1.3.1) (2025-11-09)
+
+
+### Bug Fixes
+
+* prevent infinite version creation on file selection ([376afa7](https://github.com/ExaDev/unpako/commit/376afa7265df0cff1c012e3b10d52e9a10194bec))
+* resolve E2E test logic and timeout issues ([8f3aa49](https://github.com/ExaDev/unpako/commit/8f3aa49c3563eacbf9d7e1d703155ecca431b93b))
+* resolve E2E test selector and timing issues ([cf01d93](https://github.com/ExaDev/unpako/commit/cf01d93b6e8d6435b3cb6893c9961a4e9cfff385))
+* resolve ESLint template literal formatting issues ([737883a](https://github.com/ExaDev/unpako/commit/737883a71495116f1d8984e16c91830ee4496d13))
+* resolve TypeScript errors in E2E test files ([72d53ff](https://github.com/ExaDev/unpako/commit/72d53fffcc5b7004c0a4576acf55ac4fd3880e69))
+
 # [1.3.0](https://github.com/ExaDev/unpako/compare/v1.2.1...v1.3.0) (2025-11-08)
 
 
