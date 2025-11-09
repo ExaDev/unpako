@@ -5,7 +5,8 @@ test.describe("Version Creation Bug Investigation", () => {
 		await page.goto("/");
 		// Wait for the page to be fully loaded
 		await page.waitForLoadState("domcontentloaded");
-		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 10000 });
+		// Wait for React app to load and render (longer timeout for deployed sites)
+		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 30000 });
 	});
 
 	test("should identify infinite version creation bug", async ({ page }) => {

@@ -2,9 +2,10 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Version Creation Bug - Final Investigation", () => {
 	test.beforeEach(async ({ page }) => {
-		await page.goto("/", { timeout: 10000 });
+		await page.goto("/", { timeout: 30000 });
 		await page.waitForLoadState("domcontentloaded");
-		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 10000 });
+		// Wait for React app to load and render (longer timeout for deployed sites)
+		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 30000 });
 	});
 
 	test("should demonstrate infinite version creation bug", async ({ page }) => {
