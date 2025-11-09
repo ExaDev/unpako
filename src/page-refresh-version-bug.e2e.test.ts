@@ -166,7 +166,18 @@ test.describe("Page Refresh Version Creation Bug", () => {
 		console.log("4. Testing actual content change after switching...");
 		const newContent = file2Content + "\n// Modified after switching";
 		await textArea.fill(newContent);
-		await page.waitForTimeout(2000);
+
+		// Wait for version creation to complete (more robust than fixed timeout)
+		const initialContentChangeCount = await getVersionCount(page);
+		let finalContentChangeCount = initialContentChangeCount;
+		let attempts = 0;
+		const maxAttempts = 10; // Wait up to 10 seconds
+
+		while (finalContentChangeCount === initialContentChangeCount && attempts < maxAttempts) {
+			await page.waitForTimeout(1000);
+			finalContentChangeCount = await getVersionCount(page);
+			attempts++;
+		}
 
 		const afterContentChangeVersionCount = await getVersionCount(page);
 		const contentChangeGrowth = afterContentChangeVersionCount - afterSwitchingVersionCount;
