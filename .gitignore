@@ -27,5 +27,4 @@ playwright-report/*
 
 test-results/*
 coverage/*
-root-cause-analysis.png
-version-bug-evidence.png
+*.png
