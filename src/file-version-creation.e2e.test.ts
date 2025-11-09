@@ -82,10 +82,10 @@ test.describe("File Version Creation", () => {
 		console.log(`Version growth: ${versionGrowth}`);
 
 		// The bug is present if versions grow significantly without content changes
-		expect(versionGrowth).toBeLessThan(
-			5,
-			`Expected minimal version growth (<5), but versions grew by ${versionGrowth}. This indicates the infinite version creation bug when selecting files.`
-		);
+		expect(versionGrowth).toBeLessThan(5);
+		if (versionGrowth >= 5) {
+			console.log(`Expected minimal version growth (<5), but versions grew by ${versionGrowth}. This indicates the infinite version creation bug when selecting files.`);
+		}
 	});
 
 	test("should only create versions when content actually changes", async ({ page }) => {
@@ -119,16 +119,10 @@ test.describe("File Version Creation", () => {
 		);
 
 		// Repeated selections should NOT create new versions
-		expect(afterSelectionsCount).toBe(
-			initialVersionCount,
-			"File selection without content changes should not create new versions"
-		);
+		expect(afterSelectionsCount).toBe(initialVersionCount);
 
 		// Actual content change SHOULD create a new version
-		expect(afterChangeCount).toBeGreaterThan(
-			afterSelectionsCount,
-			"Content changes should create new versions"
-		);
+		expect(afterChangeCount).toBeGreaterThan(afterSelectionsCount);
 	});
 
 	test("should handle file path changes without content changes correctly", async ({ page }) => {
@@ -143,22 +137,16 @@ test.describe("File Version Creation", () => {
 		await page.fill('input[placeholder*="File path with extension"]', "test2.js");
 		await page.waitForTimeout(1000);
 
-		const afterPathChangeCount = await getVersionCount(page);
-
-		// Change path again
 		await page.fill('input[placeholder*="File path with extension"]', "test3.js");
 		await page.waitForTimeout(1000);
 
-		const afterSecondPathChangeCount = await getVersionCount(page);
+		const finalCount = await getVersionCount(page);
 
-		console.log(`Initial: ${initialCount}, After path changes: ${afterSecondPathChangeCount}`);
+		console.log(`Initial: ${initialCount}, After path changes: ${finalCount}`);
 
 		// Path changes with same content should ideally not create versions
 		// But the current implementation might create them (part of the bug)
-		expect(afterSecondPathChangeCount - initialCount).toBeLessThan(
-			3,
-			"Path changes without content changes should not create excessive versions"
-		);
+		expect(finalCount - initialCount).toBeLessThan(3);
 	});
 
 	test("should demonstrate version history modal shows excessive versions", async ({ page }) => {
@@ -186,10 +174,10 @@ test.describe("File Version Creation", () => {
 			console.log(`Versions shown in modal: ${versionCount}`);
 
 			// The bug is present if there are many versions for no reason
-			expect(versionCount).toBeLessThan(
-				5,
-				`Expected reasonable number of versions (<5), but found ${versionCount} versions for a file that wasn't actually modified.`
-			);
+			expect(versionCount).toBeLessThan(5);
+			if (versionCount >= 5) {
+				console.log(`Expected reasonable number of versions (<5), but found ${versionCount} versions for a file that wasn't actually modified.`);
+			}
 
 			// Close the modal
 			const closeButton = page.locator(
@@ -226,9 +214,6 @@ test.describe("File Version Creation", () => {
 		console.log(`Initial: ${initialCount}, After mode switches: ${finalCount}`);
 
 		// Switching modes should not create new versions
-		expect(finalCount).toBe(
-			initialCount,
-			"Mode switches without content changes should not create new versions"
-		);
+		expect(finalCount).toBe(initialCount);
 	});
 });

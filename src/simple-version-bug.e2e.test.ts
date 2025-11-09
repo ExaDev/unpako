@@ -35,7 +35,6 @@ test.describe("Version Creation Bug Investigation", () => {
 		];
 
 		let fileItems = null;
-		let workingSelector = "";
 
 		for (const selector of possibleFileSelectors) {
 			const items = page.locator(selector);
@@ -44,7 +43,6 @@ test.describe("Version Creation Bug Investigation", () => {
 
 			if (count > 0) {
 				fileItems = items;
-				workingSelector = selector;
 				break;
 			}
 		}
@@ -87,7 +85,7 @@ test.describe("Version Creation Bug Investigation", () => {
 				};
 			} catch (error) {
 				return {
-					error: error.message,
+					error: (error as Error).message,
 					success: false,
 				};
 			}
