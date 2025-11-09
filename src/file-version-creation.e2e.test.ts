@@ -84,7 +84,9 @@ test.describe("File Version Creation", () => {
 		// The bug is present if versions grow significantly without content changes
 		expect(versionGrowth).toBeLessThan(5);
 		if (versionGrowth >= 5) {
-			console.log(`Expected minimal version growth (<5), but versions grew by ${versionGrowth}. This indicates the infinite version creation bug when selecting files.`);
+			console.log(
+				`Expected minimal version growth (<5), but versions grew by ${versionGrowth}. This indicates the infinite version creation bug when selecting files.`
+			);
 		}
 	});
 
@@ -176,7 +178,9 @@ test.describe("File Version Creation", () => {
 			// The bug is present if there are many versions for no reason
 			expect(versionCount).toBeLessThan(5);
 			if (versionCount >= 5) {
-				console.log(`Expected reasonable number of versions (<5), but found ${versionCount} versions for a file that wasn't actually modified.`);
+				console.log(
+					`Expected reasonable number of versions (<5), but found ${versionCount} versions for a file that wasn't actually modified.`
+				);
 			}
 
 			// Close the modal

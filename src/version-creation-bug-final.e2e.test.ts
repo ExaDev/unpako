@@ -66,7 +66,9 @@ test.describe("Version Creation Bug - Final Investigation", () => {
 						// The bug is demonstrated if many versions exist for no reason
 						expect(itemCount).toBeLessThan(10);
 						if (itemCount >= 10) {
-							console.log(`Expected reasonable number of versions (<10), but found ${itemCount} versions. This indicates the infinite version creation bug.`);
+							console.log(
+								`Expected reasonable number of versions (<10), but found ${itemCount} versions. This indicates the infinite version creation bug.`
+							);
 						}
 
 						// Close modal
