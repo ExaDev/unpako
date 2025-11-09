@@ -65,6 +65,7 @@ export function FileEditor({
 	const [shareableUrl, setShareableUrl] = useState("");
 	const [isUploading, setIsUploading] = useState(false);
 	const [isInitialLoad, setIsInitialLoad] = useState(true);
+	const [lastSavedContent, setLastSavedContent] = useState("");
 
 	// Load file content when a file is selected
 	useEffect(() => {
@@ -73,18 +74,32 @@ export function FileEditor({
 				const decompressed = decompressData(decodeFromBase64(file.data));
 				onContentChange(decompressed);
 				onFilepathChange(file.filepath);
+				// Update last saved state to prevent version creation on file load
+				setLastSavedContent(decompressed);
 			} catch (error) {
 				console.error("Error loading file content:", error);
 				onContentChange("");
+				setLastSavedContent("");
 			}
 		} else {
 			onContentChange("");
 			onFilepathChange("");
+			setLastSavedContent("");
 		}
 	}, [file, onContentChange, onFilepathChange]);
 
 	const updateHistoryWithCurrentContent = useCallback(async () => {
 		if (!content.trim() || !filepath.trim()) return;
+
+		// Check if content actually changed from last saved version
+		const contentChanged = content !== lastSavedContent;
+
+		// Only create a new version if content actually changed
+		// Filepath changes without content changes don't need new versions
+		if (!contentChanged) {
+			console.log("Content unchanged, skipping version creation");
+			return;
+		}
 
 		try {
 			const compressed = compressData(content);
@@ -104,10 +119,15 @@ export function FileEditor({
 			};
 
 			onUpdateHistory(historyItem);
+
+			// Update last saved state after successful version creation
+			setLastSavedContent(content);
+
+			console.log("New version created due to content change");
 		} catch (error) {
 			console.error("Error updating history:", error);
 		}
-	}, [content, filepath, file, onUpdateHistory]);
+	}, [content, filepath, file, onUpdateHistory, lastSavedContent]);
 
 	// Generate URL when content changes
 	useEffect(() => {
@@ -133,8 +153,12 @@ export function FileEditor({
 	useEffect(() => {
 		if (isInitialLoad && (content.trim() || filepath.trim())) {
 			setIsInitialLoad(false);
+			// For new files (no existing file), set initial content as last saved
+			if (!file) {
+				setLastSavedContent(content);
+			}
 		}
-	}, [content, filepath, isInitialLoad]);
+	}, [content, filepath, isInitialLoad, file]);
 
 	const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const uploadedFile = event.target.files?.[0];
