@@ -66,29 +66,38 @@ export function FileEditor({
 	const [isUploading, setIsUploading] = useState(false);
 	const [isInitialLoad, setIsInitialLoad] = useState(true);
 	const [lastSavedContent, setLastSavedContent] = useState("");
+	const [isLoadingFile, setIsLoadingFile] = useState(false);
 
 	// Load file content when a file is selected
 	useEffect(() => {
 		if (file) {
+			setIsLoadingFile(true);
 			try {
 				const decompressed = decompressData(decodeFromBase64(file.data));
 				onContentChange(decompressed);
 				onFilepathChange(file.filepath);
 				// Update last saved state to prevent version creation on file load
 				setLastSavedContent(decompressed);
+				// Small delay to ensure loading state is properly set
+				setTimeout(() => setIsLoadingFile(false), 100);
 			} catch (error) {
 				console.error("Error loading file content:", error);
 				onContentChange("");
 				setLastSavedContent("");
+				setIsLoadingFile(false);
 			}
 		} else {
 			onContentChange("");
 			onFilepathChange("");
 			setLastSavedContent("");
+			setIsLoadingFile(false);
 		}
 	}, [file, onContentChange, onFilepathChange]);
 
 	const updateHistoryWithCurrentContent = useCallback(async () => {
+		// Don't create versions during file loading or initial load
+		if (isLoadingFile || isInitialLoad) return;
+
 		if (!content.trim() || !filepath.trim()) return;
 
 		// Check if content actually changed from last saved version
@@ -127,7 +136,7 @@ export function FileEditor({
 		} catch (error) {
 			console.error("Error updating history:", error);
 		}
-	}, [content, filepath, file, onUpdateHistory, lastSavedContent]);
+	}, [content, filepath, file, onUpdateHistory, lastSavedContent, isLoadingFile, isInitialLoad]);
 
 	// Generate URL when content changes
 	useEffect(() => {
@@ -138,8 +147,10 @@ export function FileEditor({
 			if (!isInitialLoad) {
 				window.history.pushState({ path: url }, "", url);
 			}
-			// Update history in background
-			updateHistoryWithCurrentContent();
+			// Update history in background (only if not loading file)
+			if (!isLoadingFile) {
+				updateHistoryWithCurrentContent();
+			}
 		} else {
 			setShareableUrl("");
 			// Clear URL parameters when content is empty (only after initial load)
@@ -147,7 +158,7 @@ export function FileEditor({
 				window.history.pushState({}, "", window.location.pathname);
 			}
 		}
-	}, [content, filepath, isInitialLoad, updateHistoryWithCurrentContent]);
+	}, [content, filepath, isInitialLoad, updateHistoryWithCurrentContent, isLoadingFile]);
 
 	// Set isInitialLoad to false after first content update
 	useEffect(() => {
