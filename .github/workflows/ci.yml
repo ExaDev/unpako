@@ -614,10 +614,10 @@ jobs:
           # Log promotion details
           echo "Promotion completed at $(date -u +"%Y-%m-%dT%H:%M:%SZ")"
 
-  # Create release only if deployment succeeded
+  # Create release only if core quality checks passed (staging tests disabled)
   release:
     name: Release
-    needs: [setup, build, lint, unit-tests, integration-tests, component-tests, e2e-tests, security, coverage, promote-production]
+    needs: [setup, build, lint, unit-tests, integration-tests, component-tests, e2e-tests, security, coverage]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
