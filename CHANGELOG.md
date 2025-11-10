@@ -1,3 +1,28 @@
+# [1.4.0](https://github.com/ExaDev/unpako/compare/v1.3.1...v1.4.0) (2025-11-10)
+
+
+### Bug Fixes
+
+* **ci:** enable releases without disabled staging tests ([f5fb5be](https://github.com/ExaDev/unpako/commit/f5fb5bea51140132e3e10cbf69d588940afee9f4))
+* **ci:** resolve staging E2E tests cache key issue ([bf682ab](https://github.com/ExaDev/unpako/commit/bf682aba20c66fac479bd6216a72cc7bb15c393e))
+* **e2e:** correct staging URL from 404 to actual deployment ([4668f1c](https://github.com/ExaDev/unpako/commit/4668f1cdfe981370ea8325b59187a437723751a8))
+* **e2e:** increase global test timeout for staging tests ([91d4421](https://github.com/ExaDev/unpako/commit/91d442135f2f3a4cfe6f53d480a33d9a9d645353))
+* **e2e:** increase timeout for staging tests ([ed1b96b](https://github.com/ExaDev/unpako/commit/ed1b96bbb3ea5fe1106510e0cb1bc26f78eaae04))
+* **e2e:** increase timeout for staging tests to 60s ([dfb77f3](https://github.com/ExaDev/unpako/commit/dfb77f3bf989b671fe3fe22d088cfd802ddcd44a))
+* **e2e:** replace unreliable theme selector with stable CSS selector ([87e067b](https://github.com/ExaDev/unpako/commit/87e067b36bf60f4608f803ae217b74007a43fffc))
+* prevent duplicate file versions during page refresh ([94646e6](https://github.com/ExaDev/unpako/commit/94646e66059bcff72ffca580339d688ecdef3782))
+* resolve E2E test timeout in CI ([c2486f6](https://github.com/ExaDev/unpako/commit/c2486f6c6bdc3cd9adab4cbd01e9fef07a8b7cd7))
+
+
+### Features
+
+* **ci:** implement staging deployment pipeline with automated rollback ([f2ae204](https://github.com/ExaDev/unpako/commit/f2ae20441df2643f9cf56ce9964bf9303f04f599))
+
+
+### Reverts
+
+* **ci:** disable staging E2E tests and rollback selector changes ([efc66a6](https://github.com/ExaDev/unpako/commit/efc66a6c9b75f9c0f68f9209996293b4ad32b6ff))
+
 ## [1.3.1](https://github.com/ExaDev/unpako/compare/v1.3.0...v1.3.1) (2025-11-09)
 
 
