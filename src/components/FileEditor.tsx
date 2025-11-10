@@ -3,15 +3,12 @@ import {
 	Box,
 	Button,
 	Card,
-	Divider,
 	Group,
-	Highlight,
 	Stack,
 	Switch,
 	Text,
 	Textarea,
 	TextInput,
-	Title,
 } from "@mantine/core";
 import {
 	IconDownload,
@@ -194,51 +191,104 @@ export function FileEditor({
 	const { filename } = getFilepathInfo(filepath);
 
 	return (
-		<Card h="100%" withBorder p={0}>
-			<Stack gap={0} h="100%">
-				{/* Header */}
-				<Box p="md">
-					<Group justify="space-between">
-						<Group>
-							<IconFile size={20} />
-							<Title order={4}>{file ? filename : "New File"}</Title>
-						</Group>
-						<Group>
-							<Switch
-								size="sm"
-								checked={isEditMode}
-								onChange={onEditModeToggle}
-								onLabel={<IconEdit size={14} />}
-								offLabel={<IconEye size={14} />}
-								labelPosition="left"
-								label={isEditMode ? "Edit" : "Preview"}
-							/>
-						</Group>
+		<Card h="100%" withBorder p={0} style={{ display: "flex", flexDirection: "column" }}>
+			{/* Compact Header */}
+			<Box
+				p="xs"
+				style={{ borderBottom: "1px solid var(--mantine-color-default-border)", flexShrink: 0 }}
+			>
+				<Group justify="space-between">
+					<Group gap="xs">
+						<IconFile size={16} />
+						<Text size="sm" fw={500}>
+							{file ? filename : "New File"}
+						</Text>
 					</Group>
-				</Box>
+					<Switch
+						size="xs"
+						checked={isEditMode}
+						onChange={onEditModeToggle}
+						onLabel={<IconEdit size={10} />}
+						offLabel={<IconEye size={10} />}
+						labelPosition="left"
+						label={<Text size="xs">{isEditMode ? "Edit" : "Preview"}</Text>}
+					/>
+				</Group>
+			</Box>
 
-				<Divider />
-
-				{/* Toolbar */}
-				<Box p="md">
-					<Group justify="space-between">
-						<Group>
-							<TextInput
-								placeholder="File path with extension (e.g., example.txt)"
-								value={filepath}
-								onChange={e => onFilepathChange(e.currentTarget.value)}
-								size="sm"
-								style={{ flex: 1, minWidth: 200 }}
+			{/* Compact Toolbar */}
+			<Box
+				p="xs"
+				style={{ borderBottom: "1px solid var(--mantine-color-default-border)", flexShrink: 0 }}
+			>
+				<Group justify="space-between">
+					<Group gap="xs">
+						<TextInput
+							placeholder="File path (e.g., example.txt)"
+							value={filepath}
+							onChange={e => onFilepathChange(e.currentTarget.value)}
+							size="xs"
+							style={{ flex: 1, minWidth: 150 }}
+							rightSectionWidth={80}
+						/>
+					</Group>
+					<Group gap="xs">
+						<Button
+							component="label"
+							variant="light"
+							size="compact-xs"
+							leftSection={<IconFileUpload size={10} />}
+							loading={isUploading}
+						>
+							Upload
+							<input
+								type="file"
+								hidden
+								onChange={handleFileUpload}
+								accept=".txt,.json,.js,.ts,.jsx,.tsx,.html,.css,.md,.py,.java,.c,.cpp,.go,.rs"
 							/>
-						</Group>
-						<Group>
-							<Button
-								component="label"
-								size="compact-sm"
-								leftSection={<IconFileUpload size={14} />}
-								loading={isUploading}
-							>
-								Upload
+						</Button>
+						{shareableUrl && (
+							<>
+								<Button
+									variant="light"
+									size="compact-xs"
+									leftSection={<IconLink size={10} />}
+									onClick={onShare}
+								>
+									Copy
+								</Button>
+								<Button
+									variant="light"
+									size="compact-xs"
+									leftSection={<IconDownload size={10} />}
+									onClick={onDownload}
+								>
+									Download
+								</Button>
+							</>
+						)}
+						{file && (
+							<ActionIcon color="red" variant="light" size="xs" onClick={onDelete}>
+								<IconTrash size={10} />
+							</ActionIcon>
+						)}
+					</Group>
+				</Group>
+			</Box>
+
+			{/* Content Area */}
+			<Box flex={1} style={{ minHeight: 0, display: "flex", flexDirection: "column" }}>
+				{!filepath.trim() && !content.trim() ? (
+					// Empty state
+					<Box h="100%" display="flex" style={{ alignItems: "center", justifyContent: "center" }}>
+						<Stack align="center" gap="lg">
+							<IconFile size={64} style={{ color: "var(--mantine-color-dimmed)", opacity: 0.5 }} />
+							<Text size="lg" c="dimmed">
+								Select a file or create new content
+							</Text>
+							<Button component="label" variant="light" leftSection={<IconFileUpload size={14} />}>
+								Upload File
 								<input
 									type="file"
 									hidden
@@ -246,75 +296,59 @@ export function FileEditor({
 									accept=".txt,.json,.js,.ts,.jsx,.tsx,.html,.css,.md,.py,.java,.c,.cpp,.go,.rs"
 								/>
 							</Button>
-							{shareableUrl && (
-								<>
-									<Button size="compact-sm" leftSection={<IconLink size={14} />} onClick={onShare}>
-										Copy Link
-									</Button>
-									<Button size="compact-sm" leftSection={<IconDownload size={14} />} onClick={onDownload}>
-										Download
-									</Button>
-								</>
-							)}
-							{file && (
-								<ActionIcon color="red" variant="light" size="sm" onClick={onDelete}>
-									<IconTrash size={14} />
-								</ActionIcon>
-							)}
-						</Group>
-					</Group>
-				</Box>
-
-				<Divider />
-
-				{/* Content Area */}
-				<Box flex={1} p="md" style={{ minHeight: 0 }}>
-					{!filepath.trim() && !content.trim() ? (
-						// Empty state
-						<Box h="100%" display="flex" style={{ alignItems: "center", justifyContent: "center" }}>
-							<Stack align="center" gap="md">
-								<IconFile size={48} style={{ color: "var(--mantine-color-dimmed)" }} />
-								<Text size="lg" c="dimmed">
-									Select a file from the sidebar or create a new one
-								</Text>
-								<Button component="label" leftSection={<IconFileUpload size={14} />}>
-									Upload File
-									<input
-										type="file"
-										hidden
-										onChange={handleFileUpload}
-										accept=".txt,.json,.js,.ts,.jsx,.tsx,.html,.css,.md,.py,.java,.c,.cpp,.go,.rs"
-									/>
-								</Button>
-							</Stack>
-						</Box>
-					) : isEditMode ? (
-						// Edit mode
-						<Textarea
-							value={content}
-							onChange={e => onContentChange(e.currentTarget.value)}
-							placeholder="Enter your text here..."
-							style={{
-								height: "100%",
-								fontFamily: "monospace",
-								resize: "none",
-							}}
-							autosize={false}
-						/>
-					) : (
-						// Preview mode
-						<Box h="100%" style={{ overflow: "auto" }}>
-							{content.trim() ? (
-								<Highlight highlight={[]}>{content}</Highlight>
-							) : (
-								<Text c="dimmed" style={{ fontStyle: "italic" }}>
-									Empty file
-								</Text>
-							)}
-						</Box>
-					)}
-				</Box>
-			</Stack>
+						</Stack>
+					</Box>
+				) : isEditMode ? (
+					// Edit mode - full screen text editor
+					<Textarea
+						value={content}
+						onChange={e => onContentChange(e.currentTarget.value)}
+						placeholder="Start typing..."
+						style={{
+							height: "100%",
+							fontFamily: '"JetBrains Mono", "Fira Code", "SF Mono", "Monaco", "Inconsolata", monospace',
+							fontSize: 14,
+							lineHeight: 1.6,
+							resize: "none",
+							border: "none",
+							background: "transparent",
+						}}
+						autosize={false}
+						spellCheck={false}
+						styles={{
+							input: {
+								height: "100% !important",
+								minHeight: "100% !important",
+								fontFamily: '"JetBrains Mono", "Fira Code", "SF Mono", "Monaco", "Inconsolata", monospace',
+								fontSize: 14,
+								lineHeight: 1.6,
+								tabSize: 4,
+							},
+						}}
+					/>
+				) : (
+					// Preview mode
+					<Box h="100%" style={{ overflow: "auto", padding: "sm" }}>
+						{content.trim() ? (
+							<Text
+								style={{
+									fontFamily: '"JetBrains Mono", "Fira Code", "SF Mono", "Monaco", "Inconsolata", monospace',
+									fontSize: 14,
+									lineHeight: 1.6,
+									whiteSpace: "pre-wrap",
+									wordBreak: "break-word",
+								}}
+							>
+								{content}
+							</Text>
+						) : (
+							<Text c="dimmed" style={{ fontStyle: "italic" }} size="sm">
+								Empty file
+							</Text>
+						)}
+					</Box>
+				)}
+			</Box>
 		</Card>
 	);
 }
