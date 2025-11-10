@@ -1,3 +1,24 @@
+# [1.6.0](https://github.com/ExaDev/unpako/compare/v1.5.0...v1.6.0) (2025-11-10)
+
+
+### Bug Fixes
+
+* correct Playwright base URL for production preview server ([3c4313c](https://github.com/ExaDev/unpako/commit/3c4313c0b03a3203b4fa8dc7b153647622264c9b))
+* revert Playwright to use dev server for better reliability ([2f2bbf5](https://github.com/ExaDev/unpako/commit/2f2bbf57d84d041ea5c3dbf2eefeb9c27621f159))
+* update e2e test selectors for changed placeholder text ([770cf8f](https://github.com/ExaDev/unpako/commit/770cf8f9d41b6018e9f90bcf31e19927a923d779))
+* update e2e tests for new button labels in full-viewport layout ([6c94959](https://github.com/ExaDev/unpako/commit/6c9495981b51fc363e2ffc615f8a431a6a7c1621))
+
+
+### Features
+
+* enhance editor with professional typography and full-page experience ([4066e8b](https://github.com/ExaDev/unpako/commit/4066e8b69a80b414fa8f7e8705b42c533b8563f8))
+* transform main layout to full-viewport design ([3821b22](https://github.com/ExaDev/unpako/commit/3821b22fcabdbff255cb731cb313def8b6bed454))
+
+
+### Performance Improvements
+
+* optimize e2e test timeouts for faster execution ([0b4b0a0](https://github.com/ExaDev/unpako/commit/0b4b0a07f83cfba5f7c914a5b85ce7e22d065721))
+
 # [1.5.0](https://github.com/ExaDev/unpako/compare/v1.4.0...v1.5.0) (2025-11-10)
 
 
