@@ -21,13 +21,13 @@ test.describe("URL Content Loading", () => {
 		await page.waitForLoadState("networkidle");
 
 		// Wait for app components to mount in the new layout
-		await page.waitForSelector('input[placeholder*="File path with extension"]', { timeout: 5000 });
+		await page.waitForSelector('input[placeholder*="File path"]', { timeout: 5000 });
 
 		// Wait a bit more for the content loading effect to run
 		await page.waitForTimeout(2000);
 
 		// Check that filepath is populated (new selector)
-		const filepathInput = page.locator('input[placeholder*="File path with extension"]');
+		const filepathInput = page.locator('input[placeholder*="File path"]');
 		await expect(filepathInput).toHaveValue("Hello.txt");
 
 		// Check that text content is populated - check if in edit mode first
@@ -46,7 +46,7 @@ test.describe("URL Content Loading", () => {
 
 	test("should update URL when typing content", async ({ page }) => {
 		// First, set a filepath to exit empty state and show the editor
-		const filepathInput = page.locator('input[placeholder*="File path with extension"]');
+		const filepathInput = page.locator('input[placeholder*="File path"]');
 		await filepathInput.fill("test.txt");
 		await page.waitForTimeout(200);
 
@@ -68,7 +68,7 @@ test.describe("URL Content Loading", () => {
 
 	test("should update filepath in URL when changed", async ({ page }) => {
 		// First, set a filepath to exit empty state and show the editor
-		const filepathInput = page.locator('input[placeholder*="File path with extension"]');
+		const filepathInput = page.locator('input[placeholder*="File path"]');
 		await filepathInput.fill("initial.txt");
 		await page.waitForTimeout(200);
 
@@ -128,7 +128,7 @@ test.describe("URL Content Loading", () => {
 
 	test("should copy current browser URL when copy button is clicked", async ({ page }) => {
 		// First, set a filepath to exit empty state and show the editor
-		const filepathInput = page.locator('input[placeholder*="File path with extension"]');
+		const filepathInput = page.locator('input[placeholder*="File path"]');
 		await filepathInput.fill("copy-test.txt");
 		await page.waitForTimeout(200);
 
@@ -157,7 +157,7 @@ test.describe("URL Content Loading", () => {
 		const testContent = "This is test file content\nwith multiple lines";
 
 		// First, set a filepath to exit empty state and show the editor toolbar
-		const filepathInput = page.locator('input[placeholder*="File path with extension"]');
+		const filepathInput = page.locator('input[placeholder*="File path"]');
 		await filepathInput.fill("before-upload.txt");
 		await page.waitForTimeout(200);
 
@@ -205,7 +205,7 @@ test.describe("URL Content Loading", () => {
 		const specialContent = "Hello 世界! ñáéíóú";
 
 		// First, set a filepath to exit empty state and show the editor
-		const filepathInput = page.locator('input[placeholder*="File path with extension"]');
+		const filepathInput = page.locator('input[placeholder*="File path"]');
 		await filepathInput.fill("special-chars.txt");
 		await page.waitForTimeout(200);
 
@@ -237,13 +237,13 @@ test.describe("URL Content Loading", () => {
 		await page.waitForLoadState("networkidle");
 
 		// Wait for app components to mount (new selectors)
-		await page.waitForSelector('input[placeholder*="File path with extension"]', { timeout: 5000 });
+		await page.waitForSelector('input[placeholder*="File path"]', { timeout: 5000 });
 
 		// Wait a bit more for the content loading effect to run
 		await page.waitForTimeout(2000);
 
 		// Check that filepath is populated (new selector)
-		const filepathInput = page.locator('input[placeholder*="File path with extension"]');
+		const filepathInput = page.locator('input[placeholder*="File path"]');
 		await expect(filepathInput).toHaveValue("Backward.txt");
 
 		// Check that text content is populated - check both modes

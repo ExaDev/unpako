@@ -27,15 +27,15 @@ test.describe("File Version Creation", () => {
 
 	async function createTestFile(page: any, content: string, filepath: string): Promise<void> {
 		// Fill filepath first to trigger edit mode
-		await page.waitForSelector('input[placeholder*="File path with extension (e.g., example.txt)"]', {
+		await page.waitForSelector('input[placeholder*="File path (e.g., example.txt)"]', {
 			timeout: 10000,
 		});
-		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', filepath);
+		await page.fill('input[placeholder*="File path (e.g., example.txt)"]', filepath);
 		await page.waitForTimeout(500);
 
 		// Now the textarea should be available
-		await page.waitForSelector('textarea[placeholder="Enter your text here..."]', { timeout: 10000 });
-		await page.fill('textarea[placeholder="Enter your text here..."]', content);
+		await page.waitForSelector('textarea[placeholder="Start typing..."]', { timeout: 10000 });
+		await page.fill('textarea[placeholder="Start typing..."]', content);
 		await page.waitForTimeout(1000);
 	}
 
@@ -122,7 +122,7 @@ test.describe("File Version Creation", () => {
 
 		// Now actually change the content
 		const modifiedContent = "const x = 2; // Modified";
-		await page.fill('textarea[placeholder="Enter your text here..."]', modifiedContent);
+		await page.fill('textarea[placeholder="Start typing..."]', modifiedContent);
 		await page.waitForTimeout(2000); // Increased wait time for version creation
 
 		// Check version count after actual content change
@@ -151,10 +151,10 @@ test.describe("File Version Creation", () => {
 		const initialCount = await getVersionCount(page);
 
 		// Change only the file path, not content
-		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', "test2.js");
+		await page.fill('input[placeholder*="File path (e.g., example.txt)"]', "test2.js");
 		await page.waitForTimeout(1000);
 
-		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', "test3.js");
+		await page.fill('input[placeholder*="File path (e.g., example.txt)"]', "test3.js");
 		await page.waitForTimeout(1000);
 
 		const finalCount = await getVersionCount(page);

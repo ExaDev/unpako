@@ -13,9 +13,7 @@ test.describe("Page Refresh Version Creation Bug", () => {
 
 		// Step 1: Create initial file with content
 		console.log("1. Creating initial file...");
-		const filepathInput = page.locator(
-			'input[placeholder*="File path with extension (e.g., example.txt)"]'
-		);
+		const filepathInput = page.locator('input[placeholder*="File path (e.g., example.txt)"]');
 		const textArea = page.locator("textarea");
 
 		const testContent = "console.log('Page refresh test - initial version');";
@@ -91,9 +89,7 @@ test.describe("Page Refresh Version Creation Bug", () => {
 		console.log("=== Testing File Switching Version Creation Bug ===");
 
 		// Step 1: Create two different files
-		const filepathInput = page.locator(
-			'input[placeholder*="File path with extension (e.g., example.txt)"]'
-		);
+		const filepathInput = page.locator('input[placeholder*="File path (e.g., example.txt)"]');
 		const textArea = page.locator("textarea");
 
 		// Create first file
@@ -194,9 +190,7 @@ test.describe("Page Refresh Version Creation Bug", () => {
 		console.log("=== Testing Multiple Page Refreshes ===");
 
 		// Create initial file
-		const filepathInput = page.locator(
-			'input[placeholder*="File path with extension (e.g., example.txt)"]'
-		);
+		const filepathInput = page.locator('input[placeholder*="File path (e.g., example.txt)"]');
 		const textArea = page.locator("textarea");
 
 		const testContent = "const multi = 'refresh test';";

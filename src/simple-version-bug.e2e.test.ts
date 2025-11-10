@@ -16,18 +16,15 @@ test.describe("Version Creation Bug Investigation", () => {
 		console.log("Creating initial file...");
 
 		// Fill filepath first to trigger edit mode
-		await page.waitForSelector('input[placeholder*="File path with extension (e.g., example.txt)"]', {
+		await page.waitForSelector('input[placeholder*="File path (e.g., example.txt)"]', {
 			timeout: 10000,
 		});
-		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', "test.js");
+		await page.fill('input[placeholder*="File path (e.g., example.txt)"]', "test.js");
 		await page.waitForTimeout(1000);
 
 		// Now the textarea should be available
-		await page.waitForSelector('textarea[placeholder="Enter your text here..."]', { timeout: 10000 });
-		await page.fill(
-			'textarea[placeholder="Enter your text here..."]',
-			"console.log('Initial content');"
-		);
+		await page.waitForSelector('textarea[placeholder="Start typing..."]', { timeout: 10000 });
+		await page.fill('textarea[placeholder="Start typing..."]', "console.log('Initial content');");
 
 		await page.waitForTimeout(1000);
 
@@ -76,14 +73,14 @@ test.describe("Version Creation Bug Investigation", () => {
 
 		// Step 3: Test version creation by modifying content
 		const initialContent = "console.log('Version 1');";
-		await page.fill('textarea[placeholder="Enter your text here..."]', initialContent);
+		await page.fill('textarea[placeholder="Start typing..."]', initialContent);
 		await page.waitForTimeout(2000);
 
 		console.log("Content modified, waiting for potential version creation...");
 
 		// Step 4: Modify content again
 		const modifiedContent = "console.log('Version 2');";
-		await page.fill('textarea[placeholder="Enter your text here..."]', modifiedContent);
+		await page.fill('textarea[placeholder="Start typing..."]', modifiedContent);
 		await page.waitForTimeout(2000);
 
 		console.log("Content modified again...");
@@ -166,14 +163,14 @@ test.describe("Version Creation Bug Investigation", () => {
 
 	test("should manually demonstrate the version creation issue", async ({ page }) => {
 		// Create initial file
-		await page.waitForSelector('input[placeholder*="File path with extension (e.g., example.txt)"]', {
+		await page.waitForSelector('input[placeholder*="File path (e.g., example.txt)"]', {
 			timeout: 10000,
 		});
 		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', "demo.js");
 		await page.waitForTimeout(1000);
 
-		await page.waitForSelector('textarea[placeholder="Enter your text here..."]', { timeout: 10000 });
-		await page.fill('textarea[placeholder="Enter your text here..."]', "const test = 'initial';");
+		await page.waitForSelector('textarea[placeholder="Start typing..."]', { timeout: 10000 });
+		await page.fill('textarea[placeholder="Start typing..."]', "const test = 'initial';");
 		await page.waitForTimeout(2000);
 
 		// Clear and re-add the same content (simulating file selection)
@@ -181,11 +178,11 @@ test.describe("Version Creation Bug Investigation", () => {
 			console.log(`Iteration ${i + 1}: Clearing and re-adding same content...`);
 
 			// Clear content
-			await page.fill('textarea[placeholder="Enter your text here..."]', "");
+			await page.fill('textarea[placeholder="Start typing..."]', "");
 			await page.waitForTimeout(1000);
 
 			// Re-add the exact same content (simulating loading a file)
-			await page.fill('textarea[placeholder="Enter your text here..."]', "const test = 'initial';");
+			await page.fill('textarea[placeholder="Start typing..."]', "const test = 'initial';");
 			await page.waitForTimeout(2000);
 		}
 
