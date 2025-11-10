@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/ExaDev/unpako/compare/v1.4.0...v1.5.0) (2025-11-10)
+
+
+### Features
+
+* add Turborepo configuration for task orchestration ([5b03922](https://github.com/ExaDev/unpako/commit/5b03922aa144e1dff3fa0d1cb2c9858dea516dd8))
+* integrate Turborepo for task orchestration and caching ([321975f](https://github.com/ExaDev/unpako/commit/321975ff89fa01ad70099e2b51633faf88a409a5))
+
 # [1.4.0](https://github.com/ExaDev/unpako/compare/v1.3.1...v1.4.0) (2025-11-10)
 
 
