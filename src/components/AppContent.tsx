@@ -1,16 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-	Container,
-	Title,
-	Text,
-	Group,
-	Card,
-	Badge,
-	Grid,
-	Box,
-	Notification,
-	Anchor,
-} from "@mantine/core";
+import { Title, Text, Group, Card, Badge, Box, Notification, Anchor } from "@mantine/core";
 import { IconPackage, IconCheck, IconLink, IconBrandGithub } from "@tabler/icons-react";
 import packageJson from "../../package.json";
 import { FileTreeSidebar } from "./FileTreeSidebar";
@@ -172,24 +161,28 @@ function AppContent() {
 	};
 
 	return (
-		<Container size="xl" py="xl" h="100vh" style={{ display: "flex", flexDirection: "column" }}>
-			{/* Header */}
-			<Card withBorder p="md" mb="lg">
+		<Box h="100vh" w="100%" style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+			{/* Compact Header */}
+			<Card
+				withBorder={false}
+				p="xs"
+				style={{ borderBottom: "1px solid var(--mantine-color-default-border)", flexShrink: 0 }}
+			>
 				<Group justify="space-between">
-					<Group>
-						<IconPackage size={32} color="#1c7ed6" />
+					<Group gap="sm">
+						<IconPackage size={24} color="#1c7ed6" />
 						<div>
-							<Title order={1} c="blue">
+							<Title order={2} c="blue" size="h4">
 								Unpako
 							</Title>
-							<Text size="sm" c="dimmed">
-								Share code and text via compressed URLs
+							<Text size="xs" c="dimmed">
+								Share code via compressed URLs
 							</Text>
 						</div>
 					</Group>
 
-					<Group>
-						<Badge color="blue" variant="light" size="lg">
+					<Group gap="sm">
+						<Badge color="blue" variant="light" size="sm">
 							{stats.totalItems} files
 						</Badge>
 						<ThemeToggle />
@@ -199,7 +192,7 @@ function AppContent() {
 
 			{/* Notification */}
 			{showNotification && (
-				<Box mb="md">
+				<Box p="xs" style={{ flexShrink: 0 }}>
 					<Notification
 						color={showNotification.type === "success" ? "green" : "red"}
 						onClose={() => setShowNotification(null)}
@@ -211,9 +204,16 @@ function AppContent() {
 			)}
 
 			{/* Main Content Grid */}
-			<Grid h="100%" style={{ flex: 1, minHeight: 0 }}>
+			<Box style={{ flex: 1, minHeight: 0, display: "flex" }}>
 				{/* File Tree Sidebar */}
-				<Grid.Col span={{ base: 12, md: 4, lg: 3 }}>
+				<Box
+					style={{
+						width: "33.33%",
+						minWidth: 250,
+						maxWidth: 350,
+						borderRight: "1px solid var(--mantine-color-default-border)",
+					}}
+				>
 					<FileTreeSidebar
 						files={files}
 						selectedFile={selectedFile}
@@ -222,10 +222,10 @@ function AppContent() {
 						onShowVersionHistory={handleShowVersionHistory}
 						stats={stats}
 					/>
-				</Grid.Col>
+				</Box>
 
 				{/* File Editor */}
-				<Grid.Col span={{ base: 12, md: 8, lg: 9 }}>
+				<Box style={{ flex: 1, minHeight: 0, padding: "var(--mantine-spacing-sm)" }}>
 					<FileEditor
 						file={selectedFile}
 						content={codeInput}
@@ -240,28 +240,27 @@ function AppContent() {
 						onDelete={handleDelete}
 						onUpdateHistory={handleUpdateHistory}
 					/>
-				</Grid.Col>
-			</Grid>
+				</Box>
+			</Box>
 
-			{/* Footer */}
-			<Box mt="lg" py="md">
+			{/* Minimal Footer */}
+			<Box
+				p="xs"
+				style={{ borderTop: "1px solid var(--mantine-color-default-border)", flexShrink: 0 }}
+			>
 				<Group justify="center" gap="xs">
-					<Text size="sm" c="dimmed">
-						Version {packageJson.version}
-					</Text>
-					<Text size="sm" c="dimmed">
-						•
+					<Text size="xs" c="dimmed">
+						v{packageJson.version}
 					</Text>
 					<Anchor
-						size="sm"
+						size="xs"
 						href={`https://github.com/ExaDev/unpako/releases/tag/v${packageJson.version}`}
 						target="_blank"
 						rel="noopener noreferrer"
-						fw={500}
 					>
 						<Group gap={4} align="center">
-							<IconBrandGithub size={12} />
-							Release Notes
+							<IconBrandGithub size={10} />
+							Notes
 						</Group>
 					</Anchor>
 				</Group>
@@ -279,7 +278,7 @@ function AppContent() {
 				}
 				onSelectVersion={handleSelectVersion}
 			/>
-		</Container>
+		</Box>
 	);
 }
 
