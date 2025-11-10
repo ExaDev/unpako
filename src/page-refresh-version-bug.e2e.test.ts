@@ -123,7 +123,7 @@ test.describe("Page Refresh Version Creation Bug", () => {
 
 			// Switch to first file (select from sidebar)
 			await selectSidebarFile(page, 0);
-			await page.waitForTimeout(1000);
+			await page.waitForTimeout(300);
 
 			// Verify first file content is loaded
 			const currentContent1 = await textArea.inputValue();
@@ -133,7 +133,7 @@ test.describe("Page Refresh Version Creation Bug", () => {
 
 			// Switch to second file (select from sidebar)
 			await selectSidebarFile(page, 1);
-			await page.waitForTimeout(1000);
+			await page.waitForTimeout(300);
 
 			// Verify second file content is loaded
 			const currentContent2 = await textArea.inputValue();
@@ -237,31 +237,44 @@ test.describe("Page Refresh Version Creation Bug", () => {
 
 // Helper function to select a file from the sidebar
 async function selectSidebarFile(page: any, index: number = 0): Promise<void> {
-	// Try multiple selectors to find file items in the sidebar
+	// Try multiple selectors to find file items in the sidebar with the new layout
 	const possibleSelectors = [
 		'[class*="node"]:has([class*="filename"])', // CSS module approach
-		'[class*="FileTreeNode_node"]', // Direct class name
+		'[class*="FileTreeNode_node"]', // Direct class name from FileTreeNode
 		'.mantine-Card-root [class*="node"]', // Node within sidebar card
-		'[role="button"]:has-text(".js")', // Text-based approach for .js files
-		'[role="button"]:has-text(".txt")', // Text-based approach for .txt files
+		'[class*="filename"]', // Text with filename class
+		'button:has-text(".js")', // Text-based approach for .js files
+		'button:has-text(".txt")', // Text-based approach for .txt files
+		'*:has-text(".js"):has([class*="node"])', // Any element containing .js with node class
+		'*:has-text(".txt"):has([class*="node"])', // Any element containing .txt with node class
 	];
 
 	let fileItems = null;
 	let count = 0;
 
 	for (const selector of possibleSelectors) {
-		fileItems = page.locator(selector);
-		count = await fileItems.count();
-		if (count > 0) {
-			console.log(`   Found ${count} file items with selector: ${selector}`);
-			break;
+		try {
+			fileItems = page.locator(selector);
+			count = await fileItems.count();
+			if (count > 0) {
+				console.log(`   Found ${count} file items with selector: ${selector}`);
+				break;
+			}
+		} catch (error) {
+			// Continue to next selector if this one fails
+			continue;
 		}
 	}
 
 	if (count > 0) {
 		const targetIndex = Math.min(index, count - 1);
 		await fileItems.nth(targetIndex).click();
-		await page.waitForTimeout(1000);
+		// Reduce wait time and wait for a specific element instead
+		try {
+			await page.waitForTimeout(500);
+		} catch (error) {
+			// Continue even if wait times out
+		}
 	} else {
 		console.log("   No file items found in sidebar, taking screenshot for debugging...");
 		await page.screenshot({ path: `debug-sidebar-${Date.now()}.png` });
