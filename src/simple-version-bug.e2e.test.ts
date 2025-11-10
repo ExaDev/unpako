@@ -166,7 +166,7 @@ test.describe("Version Creation Bug Investigation", () => {
 		await page.waitForSelector('input[placeholder*="File path (e.g., example.txt)"]', {
 			timeout: 10000,
 		});
-		await page.fill('input[placeholder*="File path with extension (e.g., example.txt)"]', "demo.js");
+		await page.fill('input[placeholder*="File path (e.g., example.txt)"]', "demo.js");
 		await page.waitForTimeout(1000);
 
 		await page.waitForSelector('textarea[placeholder="Start typing..."]', { timeout: 10000 });
