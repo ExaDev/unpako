@@ -1,0 +1,110 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build:base": {
+      "dependsOn": ["^build:base"],
+      "inputs": [
+        "src/**",
+        "public/**",
+        "index.html",
+        "vite.config.ts",
+        "tsconfig.json",
+        "tsconfig.app.json",
+        "tsconfig.node.json"
+      ],
+      "outputs": ["dist/**"],
+      "cache": true
+    },
+    "typecheck:base": {
+      "dependsOn": ["^typecheck:base"],
+      "inputs": [
+        "src/**",
+        "tsconfig.json",
+        "tsconfig.app.json",
+        "tsconfig.node.json"
+      ],
+      "outputs": [],
+      "cache": true
+    },
+    "test:base": {
+      "inputs": [
+        "src/**",
+        "vitest.config.ts",
+        "tsconfig.json"
+      ],
+      "outputs": ["coverage/**"],
+      "cache": true
+    },
+    "test:unit:base": {
+      "inputs": [
+        "src/**/*.unit.test.{ts,tsx}",
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "vitest.config.ts",
+        "tsconfig.json"
+      ],
+      "outputs": ["coverage/**"],
+      "cache": true
+    },
+    "test:integration:base": {
+      "inputs": [
+        "src/**/*.integration.test.{ts,tsx}",
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "vitest.config.ts",
+        "tsconfig.json"
+      ],
+      "outputs": ["coverage/**"],
+      "cache": true
+    },
+    "test:component:base": {
+      "inputs": [
+        "src/**/*.component.test.{ts,tsx}",
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "vitest.config.ts",
+        "tsconfig.json"
+      ],
+      "outputs": ["coverage/**"],
+      "cache": true
+    },
+    "test:coverage:base": {
+      "inputs": [
+        "src/**",
+        "vitest.config.ts",
+        "tsconfig.json"
+      ],
+      "outputs": ["coverage/**"],
+      "cache": true
+    },
+    "test:e2e:base": {
+      "dependsOn": ["build:base"],
+      "inputs": [
+        "src/**/*.e2e.test.{ts,tsx}",
+        "playwright.config.ts",
+        "playwright.staging.config.ts",
+        "dist/**"
+      ],
+      "outputs": [
+        "playwright-report/**",
+        "test-results/**",
+        "coverage/playwright-report.json"
+      ],
+      "cache": true
+    },
+    "lint:base": {
+      "inputs": [
+        "src/**/*.{ts,tsx}",
+        "eslint.config.js",
+        "eslint-rules/**",
+        ".prettierrc"
+      ],
+      "outputs": [],
+      "cache": true
+    },
+    "dev:base": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
