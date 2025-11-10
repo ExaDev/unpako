@@ -28,11 +28,11 @@ test.describe("Version Creation Bug - Final Investigation", () => {
 
 			// Clear content (simulates switching to a different file)
 			await textArea.fill("");
-			await page.waitForTimeout(1000);
+			await page.waitForTimeout(500);
 
 			// Re-add the exact same content (simulates loading the same file)
 			await textArea.fill("console.log('Initial version');");
-			await page.waitForTimeout(2000);
+			await page.waitForTimeout(1000);
 		}
 
 		// Step 3: Take screenshot for evidence
@@ -87,18 +87,18 @@ test.describe("Version Creation Bug - Final Investigation", () => {
 
 		const initialContent = "console.log('Before change');";
 		await textArea.fill(initialContent);
-		await page.waitForTimeout(2000);
+		await page.waitForTimeout(1000);
 
 		// Clear and reload same content (file loading simulation)
 		await textArea.fill("");
-		await page.waitForTimeout(1000);
+		await page.waitForTimeout(500);
 		await textArea.fill(initialContent);
-		await page.waitForTimeout(2000);
+		await page.waitForTimeout(1000);
 
 		// Now make actual content change
 		const changedContent = "console.log('After change');";
 		await textArea.fill(changedContent);
-		await page.waitForTimeout(2000);
+		await page.waitForTimeout(1000);
 
 		await page.screenshot({ path: "content-change-test.png" });
 
@@ -130,7 +130,7 @@ test.describe("Version Creation Bug - Final Investigation", () => {
 		console.log("Test 2: Testing content changes...");
 		for (let i = 0; i < 3; i++) {
 			await textArea.fill(`const test = 'version ${i + 2}';`);
-			await page.waitForTimeout(1000);
+			await page.waitForTimeout(500);
 		}
 
 		// Test 3: Clear and refill content (file selection simulation)
@@ -138,9 +138,9 @@ test.describe("Version Creation Bug - Final Investigation", () => {
 		const baseContent = "const test = 'base';";
 		for (let i = 0; i < 3; i++) {
 			await textArea.fill("");
-			await page.waitForTimeout(500);
+			await page.waitForTimeout(250);
 			await textArea.fill(baseContent);
-			await page.waitForTimeout(1000);
+			await page.waitForTimeout(500);
 		}
 
 		await page.screenshot({ path: "root-cause-analysis.png" });
