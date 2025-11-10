@@ -40,8 +40,8 @@ test.describe("URL Content Loading", () => {
 			await expect(codeContent).toContainText("Hello World!");
 		}
 
-		// Check that the "Copy Link" button is visible (indicating content is ready)
-		await expect(page.locator('button:has-text("Copy Link")')).toBeVisible();
+		// Check that the "Copy" button is visible (indicating content is ready)
+		await expect(page.locator('button:has-text("Copy")')).toBeVisible();
 	});
 
 	test("should update URL when typing content", async ({ page }) => {
@@ -141,7 +141,7 @@ test.describe("URL Content Loading", () => {
 		await page.waitForTimeout(500);
 
 		// Click copy Link button (new text)
-		await page.locator('button:has-text("Copy Link")').click();
+		await page.locator('button:has-text("Copy")').click();
 
 		// Wait a moment for copy to complete
 		await page.waitForTimeout(200);
@@ -256,7 +256,7 @@ test.describe("URL Content Loading", () => {
 			await expect(codeContent).toContainText("Hello World!");
 		}
 
-		// Check that the "Copy Link" button is visible (indicating content is ready)
-		await expect(page.locator('button:has-text("Copy Link")')).toBeVisible();
+		// Check that the "Copy" button is visible (indicating content is ready)
+		await expect(page.locator('button:has-text("Copy")')).toBeVisible();
 	});
 });
