@@ -6,7 +6,7 @@ test.describe("File Version Creation", () => {
 		// Wait for the page to be fully loaded
 		await page.waitForLoadState("domcontentloaded");
 		// Wait for React app to load and render (longer timeout for deployed sites)
-		await page.waitForSelector('.mantine-ActionIcon-root[data-variant="subtle"]', { timeout: 60000 });
+		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 60000 });
 	});
 
 	async function getVersionCount(page: any): Promise<number> {

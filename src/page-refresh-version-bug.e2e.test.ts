@@ -5,7 +5,7 @@ test.describe("Page Refresh Version Creation Bug", () => {
 		await page.goto("/", { timeout: 30000 });
 		await page.waitForLoadState("domcontentloaded");
 		// Wait for React app to load and render
-		await page.waitForSelector('.mantine-ActionIcon-root[data-variant="subtle"]', { timeout: 60000 });
+		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 60000 });
 	});
 
 	test("should NOT create new versions when page is refreshed with same URL", async ({ page }) => {
@@ -38,7 +38,7 @@ test.describe("Page Refresh Version Creation Bug", () => {
 		// Step 3: Refresh the page with the same URL
 		console.log("2. Refreshing page with same URL...");
 		await page.reload({ waitUntil: "domcontentloaded" });
-		await page.waitForSelector('.mantine-ActionIcon-root[data-variant="subtle"]', { timeout: 60000 });
+		await page.waitForSelector('[aria-label*="Theme"]', { timeout: 60000 });
 
 		// Wait for content to load
 		await page.waitForTimeout(2000);
@@ -215,7 +215,7 @@ test.describe("Page Refresh Version Creation Bug", () => {
 			console.log(`Refresh ${i + 1}/${refreshCount}...`);
 
 			await page.reload({ waitUntil: "domcontentloaded" });
-			await page.waitForSelector('.mantine-ActionIcon-root[data-variant="subtle"]', {
+			await page.waitForSelector('[aria-label*="Theme"]', {
 				timeout: 60000,
 			});
 			await page.waitForTimeout(2000);
