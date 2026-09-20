@@ -757,8 +757,8 @@ jobs:
             .vite
           key: ${{ needs.build.outputs.build-cache-key }}
 
+      # No npm credential is passed: this release never reaches the npm registry. .releaserc.cjs configures @semantic-release/npm with npmPublish false, and the root package.json is private, so the plugin only writes the version into package.json. @semantic-release/npm skips its auth verification entirely when either of those holds, so there is nothing here for a token to authenticate. The release's actual outputs are the CHANGELOG commit, the git tag and the GitHub release, all of which GITHUB_TOKEN covers.
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
