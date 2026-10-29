@@ -1,5 +1,7 @@
 # Unpako
 
+[![GitHub](https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white)](https://github.com/ExaDev/unpako) [![Release](https://img.shields.io/github/v/release/ExaDev/unpako)](https://github.com/ExaDev/unpako/releases/latest) [![CI](https://img.shields.io/github/actions/workflow/status/ExaDev/unpako/ci.yml?branch=main)](https://github.com/ExaDev/unpako/actions)
+
 A React + TypeScript web application that enables file sharing via compressed URLs. Files are compressed using pako (zlib), base64-encoded, and embedded in URL parameters, allowing direct sharing without external storage.
 
 ## Features
